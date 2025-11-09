@@ -4,13 +4,14 @@ A simple MCP (Model Context Protocol) server built with FastMCP.
 
 ## Description
 
-Kommunicator is an MCP server that provides email sending capabilities through Microsoft Teams webhooks. It exposes tools for checking server status and sending emails to recipients.
+Kommunicator is an MCP server that provides email sending capabilities through Microsoft Teams webhooks. It exposes tools for checking server status and sending emails to recipients, and includes a command-line interface for standalone email sending.
 
 ## Features
 
 - 🔧 A `get_status` tool to check server status
-- � A `send_email` tool to send emails via Teams webhook
-- �🚀 Uses FastMCP for simplified setup
+- 📧 A `send_email` tool to send emails via Teams webhook
+- 💻 Command-line interface for standalone email sending
+- 🚀 Uses FastMCP for simplified setup
 - 📡 Communication via stdio
 - 📝 Comprehensive logging to file
 
@@ -52,10 +53,59 @@ export TEAMS_WEBHOOK_URL_SEND_EMAIL_TO_USER='https://your-teams-webhook-url'
 
 ## Usage
 
-### Running the server
+### Command-Line Interface (CLI)
+
+The CLI allows you to send emails directly from the command line without running the MCP server.
+
+**Basic usage:**
 
 ```bash
-uv run mcp-kommunicator.py
+./kommunicator-cli.py email --to user@example.com --subject "Meeting" --body "Meeting at 2pm"
+```
+
+**Available commands:**
+
+- `email`: Send an email via Teams webhook
+
+**Global options:**
+
+- `-v`, `--verbose`: Enable verbose output
+- `-h`, `--help`: Show help message
+
+**Email command options:**
+
+- `--to` (required): Recipient email address
+- `--subject` (required): Email subject
+- `--body` (optional): Email body content. If not provided, reads from stdin
+
+**Examples:**
+
+```bash
+# Simple email
+./kommunicator-cli.py email --to user@example.com --subject "Hello" --body "Hello World!"
+
+# Email with message from stdin
+echo "Meeting at 2pm" | ./kommunicator-cli.py email --to user@example.com --subject "Reminder"
+
+# Email with message from file
+cat report.txt | ./kommunicator-cli.py email --to user@example.com --subject "Daily Report"
+
+# Verbose mode
+./kommunicator-cli.py -v email --to user@example.com --subject "Test" --body "Test"
+
+# Using with uv
+uv run kommunicator-cli.py email --to user@example.com --subject "Hello" --body "Test"
+
+# Show help for email command
+./kommunicator-cli.py email --help
+```
+
+**Note:** The CLI requires the same `TEAMS_WEBHOOK_URL_SEND_EMAIL_TO_USER` environment variable as the MCP server.
+
+### Running the MCP Server
+
+```bash
+uv run kommunicator-mcp.py
 ```
 
 The server will start and listen on standard input/output (stdio).
@@ -65,7 +115,7 @@ The server will start and listen on standard input/output (stdio).
 For development and testing, you can use the MCP Inspector to interact with the server:
 
 ```bash
-uv run mcp dev mcp-kommunicator.py
+uv run mcp dev kommunicator-mcp.py
 ```
 
 This will launch the MCP Inspector in your browser, providing a web interface to:
@@ -88,7 +138,7 @@ To use this MCP server with Claude Desktop, add the following configuration to y
         "--directory",
         "/path/to/kommunicator",
         "run",
-        "mcp-kommunicator.py"
+        "kommunicator-mcp.py"
       ],
       "env": {
         "TEAMS_WEBHOOK_URL_SEND_EMAIL_TO_USER": "https://your-teams-webhook-url"
@@ -145,7 +195,8 @@ send_email(
 
 ```text
 kommunicator/
-├── mcp-kommunicator.py    # Main MCP server
+├── kommunicator-mcp.py    # Main MCP server
+├── kommunicator-cli.py    # Command-line interface
 ├── utils.py               # Email sending utilities
 ├── logging_config.py      # Logging configuration
 ├── pyproject.toml         # Project configuration
