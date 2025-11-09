@@ -19,14 +19,14 @@ Kommunicator is a demonstration MCP server that exposes a basic status tool. It 
 
 ## Installation
 
-1. Clone the repository:
+- Clone the repository:
 
 ```bash
 git clone <repo-url>
 cd kommunicator
 ```
 
-2. Install dependencies with uv:
+- Install dependencies with uv:
 
 ```bash
 uv sync
@@ -37,7 +37,7 @@ uv sync
 ### Running the server
 
 ```bash
-uv run kommunicator.py
+uv run mcp-kommunicator.py
 ```
 
 The server will start and listen on standard input/output (stdio).
@@ -47,7 +47,7 @@ The server will start and listen on standard input/output (stdio).
 For development and testing, you can use the MCP Inspector to interact with the server:
 
 ```bash
-uv run mcp dev kommunicator.py
+uv run mcp dev mcp-kommunicator.py
 ```
 
 This will launch the MCP Inspector in your browser, providing a web interface to:
@@ -64,13 +64,13 @@ To use this MCP server with Claude Desktop, add the following configuration to y
 ```json
 {
   "mcpServers": {
-    "kommunicator": {
+    "mcp-kommunicator": {
       "command": "uv",
       "args": [
         "--directory",
         "/path/to/kommunicator",
         "run",
-        "kommunicator.py"
+        "mcp-kommunicator.py"
       ]
     }
   }
@@ -96,9 +96,9 @@ Returns the current server status.
 
 ```text
 kommunicator/
-├── kommunicator.py    # Main MCP server
-├── pyproject.toml     # Project configuration
-└── README.md          # Documentation
+├── mcp-kommunicator.py    # Main MCP server
+├── pyproject.toml         # Project configuration
+└── README.md              # Documentation
 ```
 
 ### Adding New Tools

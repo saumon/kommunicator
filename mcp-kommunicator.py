@@ -1,11 +1,11 @@
 from mcp.server.fastmcp import FastMCP
 
 # Initialize FastMCP server
-mcp = FastMCP("kommunicator")
+mcp = FastMCP("mcp-kommunicator")
 
 @mcp.tool()
 def get_status():
-    return "The kommunicator is up and running!"
+    return "The mcp-kommunicator is up and running!"
 
 def main():
     # Initialize and run the server
