@@ -15,7 +15,7 @@ def send_email_http(to: str, subject: str, body: str) -> None:
         body: Email body content
 
     Raises:
-        ValueError: If TEAMS_WEBHOOK_URL_SEND_EMAIL_TO_USER is not set
+        ValueError: If TEAMS_WEBHOOK_KOMMUNICATOR is not set
         requests.RequestException: If there's an error sending the HTTP request
         Exception: For any other unexpected errors
     """
@@ -23,11 +23,11 @@ def send_email_http(to: str, subject: str, body: str) -> None:
         logger.info(f"Attempting to send email to {to}")
 
         # Get webhook URL from environment variable
-        webhook_url = os.getenv("TEAMS_WEBHOOK_URL_SEND_EMAIL_TO_USER")
+        webhook_url = os.getenv("TEAMS_WEBHOOK_KOMMUNICATOR")
 
         if not webhook_url:
             error_msg = (
-                "TEAMS_WEBHOOK_URL_SEND_EMAIL_TO_USER environment variable is not set. "
+                "TEAMS_WEBHOOK_KOMMUNICATOR environment variable is not set. "
                 "Please set it to your Teams webhook URL."
             )
             logger.error(error_msg)
@@ -38,6 +38,7 @@ def send_email_http(to: str, subject: str, body: str) -> None:
 
         # Prepare JSON payload
         payload = {
+            "target": "email",
             "to": to,
             "subject": subject,
             "body": body_formatted
@@ -53,6 +54,8 @@ def send_email_http(to: str, subject: str, body: str) -> None:
 
         # Check if request was successful
         response.raise_for_status()
+
+        logger.debug(f"Received response: {response.status_code} - {response.text}")
 
         logger.info(f"Email sent successfully to {to} with subject '{subject}'")
 

@@ -92,7 +92,7 @@ Examples:
   cat message.txt | %(prog)s email --to user@example.com --subject "Report"
 
 Environment Variables:
-  TEAMS_WEBHOOK_URL_SEND_EMAIL_TO_USER - Required Teams webhook URL
+  TEAMS_WEBHOOK_KOMMUNICATOR - Required Teams webhook URL
         """
     )
 
