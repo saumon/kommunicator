@@ -41,12 +41,12 @@ uv sync
 
 The server requires the following environment variable to be set:
 
-- `TEAMS_WEBHOOK_URL_SEND_EMAIL_TO_USER`: The Microsoft Teams webhook URL for sending emails
+- `TEAMS_WEBHOOK_KOMMUNICATOR`: The Microsoft Teams webhook URL for sending emails
 
 **Setting the environment variable:**
 
 ```bash
-export TEAMS_WEBHOOK_URL_SEND_EMAIL_TO_USER='https://your-teams-webhook-url'
+export TEAMS_WEBHOOK_KOMMUNICATOR='https://your-teams-webhook-url'
 ```
 
 **For persistent configuration**, you can create a `.env` file or add it to your shell profile (`~/.zshrc`, `~/.bashrc`, etc.).
@@ -100,7 +100,7 @@ uv run kommunicator-cli.py email --to user@example.com --subject "Hello" --body 
 ./kommunicator-cli.py email --help
 ```
 
-**Note:** The CLI requires the same `TEAMS_WEBHOOK_URL_SEND_EMAIL_TO_USER` environment variable as the MCP server.
+**Note:** The CLI requires the same `TEAMS_WEBHOOK_KOMMUNICATOR` environment variable as the MCP server.
 
 ### Running the MCP Server
 
@@ -141,7 +141,7 @@ To use this MCP server with Claude Desktop, add the following configuration to y
         "kommunicator-mcp.py"
       ],
       "env": {
-        "TEAMS_WEBHOOK_URL_SEND_EMAIL_TO_USER": "https://your-teams-webhook-url"
+        "TEAMS_WEBHOOK_KOMMUNICATOR": "https://your-teams-webhook-url"
       }
     }
   }
@@ -187,7 +187,7 @@ send_email(
 )
 ```
 
-**Note:** Requires `TEAMS_WEBHOOK_URL_SEND_EMAIL_TO_USER` environment variable to be set.
+**Note:** Requires `TEAMS_WEBHOOK_KOMMUNICATOR` environment variable to be set.
 
 ## Development
 
