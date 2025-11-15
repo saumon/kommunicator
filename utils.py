@@ -191,16 +191,22 @@ def send_email_http(to: str, subject: str, body: str) -> None:
     Send an email via Teams webhook.
 
     Args:
-        to: Recipient email address
+        to: Recipient email address or alias
         subject: Email subject
         body: Email body content
 
     Raises:
-        ValueError: If TEAMS_WEBHOOK_KOMMUNICATOR is not set
+        ValueError: If TEAMS_WEBHOOK_KOMMUNICATOR is not set or if alias is not found
         requests.RequestException: If there's an error sending the HTTP request
         Exception: For any other unexpected errors
     """
     try:
+        # If 'to' is not an email address (doesn't contain @), treat it as an alias
+        if '@' not in to:
+            logger.info(f"'{to}' appears to be an alias, looking up email address")
+            to = get_email_by_alias(to)
+            logger.info(f"Resolved alias to email: {to}")
+
         logger.info(f"Attempting to send email to {to}")
 
         # Get webhook URL from environment variable

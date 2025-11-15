@@ -106,11 +106,17 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  # Send a simple email
+  # Send a simple email with email address
   kommunicator-cli send-email --to user@example.com --subject "Meeting" --body "Meeting at 2pm"
 
+  # Send email using an alias
+  kommunicator-cli send-email --to john --subject "Hello" --body "Hi John!"
+
+  # Send email using multi-word alias
+  kommunicator-cli send-email --to "john doe" --subject "Meeting" --body "See you at 2pm"
+
   # Send email with message from stdin
-  echo "Hello World" | kommunicator-cli send-email --to user@example.com --subject "Greeting"
+  echo "Hello World" | kommunicator-cli send-email --to john --subject "Greeting"
 
   # Send email with message from file
   cat message.txt | kommunicator-cli send-email --to user@example.com --subject "Report"
@@ -123,7 +129,7 @@ Environment Variables:
     email_parser.add_argument(
         "--to",
         required=True,
-        help="Recipient email address"
+        help="Recipient email address or alias"
     )
 
     email_parser.add_argument(
