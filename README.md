@@ -135,12 +135,12 @@ The CLI allows you to send emails directly from the command line without running
 **Basic usage:**
 
 ```bash
-./kommunicator-cli.py email --to user@example.com --subject "Meeting" --body "Meeting at 2pm"
+./kommunicator-cli.py send-email --to user@example.com --subject "Meeting" --body "Meeting at 2pm"
 ```
 
 **Available commands:**
 
-- `email`: Send an email via Teams webhook
+- `send-email`: Send an email via Teams webhook
 - `get-email`: Look up email address by alias
 
 **Global options:**
@@ -148,7 +148,7 @@ The CLI allows you to send emails directly from the command line without running
 - `-v`, `--verbose`: Enable verbose output
 - `-h`, `--help`: Show help message
 
-**Email command options:**
+**Send-email command options:**
 
 - `--to` (required): Recipient email address
 - `--subject` (required): Email subject
@@ -162,13 +162,13 @@ The CLI allows you to send emails directly from the command line without running
 
 ```bash
 # Simple email
-./kommunicator-cli.py email --to user@example.com --subject "Hello" --body "Hello World!"
+./kommunicator-cli.py send-email --to user@example.com --subject "Hello" --body "Hello World!"
 
 # Email with message from stdin
-echo "Meeting at 2pm" | ./kommunicator-cli.py email --to user@example.com --subject "Reminder"
+echo "Meeting at 2pm" | ./kommunicator-cli.py send-email --to user@example.com --subject "Reminder"
 
 # Email with message from file
-cat report.txt | ./kommunicator-cli.py email --to user@example.com --subject "Daily Report"
+cat report.txt | ./kommunicator-cli.py send-email --to user@example.com --subject "Daily Report"
 
 # Look up email by alias
 ./kommunicator-cli.py get-email --alias "john"
@@ -179,20 +179,20 @@ cat report.txt | ./kommunicator-cli.py email --to user@example.com --subject "Da
 # Look up email by auto-generated alias
 ./kommunicator-cli.py get-email --alias "moore"
 
-# Combine get-email with email command
+# Combine get-email with send-email command
 email=$(./kommunicator-cli.py get-email --alias "john")
-./kommunicator-cli.py email --to "$email" --subject "Hello" --body "Message"
+./kommunicator-cli.py send-email --to "$email" --subject "Hello" --body "Message"
 
 # Verbose mode
-./kommunicator-cli.py -v email --to user@example.com --subject "Test" --body "Test"
+./kommunicator-cli.py -v send-email --to user@example.com --subject "Test" --body "Test"
 ./kommunicator-cli.py -v get-email --alias "john"
 
 # Using with uv
-uv run kommunicator-cli.py email --to user@example.com --subject "Hello" --body "Test"
+uv run kommunicator-cli.py send-email --to user@example.com --subject "Hello" --body "Test"
 uv run kommunicator-cli.py get-email --alias "john"
 
 # Show help for commands
-./kommunicator-cli.py email --help
+./kommunicator-cli.py send-email --help
 ./kommunicator-cli.py get-email --help
 ```
 
