@@ -5,7 +5,7 @@ Kommunicator CLI - Command line interface for interacting with Kommunicator serv
 
 import sys
 import argparse
-from utils import send_email_http
+from utils import send_email_http, get_email_by_alias
 from logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -49,6 +49,30 @@ def cmd_email(args):
     except Exception as e:
         print(f"✗ Error sending email: {e}", file=sys.stderr)
         logger.error(f"CLI: Error sending email: {e}", exc_info=True)
+        return 1
+
+
+def cmd_get_email(args):
+    """Handle the get-email command."""
+    try:
+        if args.verbose:
+            print(f"Looking up alias: {args.alias}")
+
+        logger.info(f"CLI: Looking up email for alias: {args.alias}")
+        email = get_email_by_alias(args.alias)
+
+        print(email)
+        logger.info(f"CLI: Found email {email} for alias: {args.alias}")
+        return 0
+
+    except ValueError as e:
+        print(f"✗ Error: {e}", file=sys.stderr)
+        logger.error(f"CLI: Error looking up alias '{args.alias}': {e}")
+        return 1
+
+    except Exception as e:
+        print(f"✗ Unexpected error: {e}", file=sys.stderr)
+        logger.error(f"CLI: Unexpected error looking up alias '{args.alias}': {e}", exc_info=True)
         return 1
 
 
@@ -114,6 +138,35 @@ Environment Variables:
     )
 
     email_parser.set_defaults(func=cmd_email)
+
+    # Get-email command
+    get_email_parser = subparsers.add_parser(
+        "get-email",
+        help="Look up email address by alias",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  # Look up email by alias
+  %(prog)s get-email --alias "john"
+
+  # Look up email by multi-word alias
+  %(prog)s get-email --alias "john smith"
+
+  # Look up email by auto-generated alias
+  %(prog)s get-email --alias "moore"
+
+Configuration:
+  Uses conf/humans.conf for alias-to-email mappings
+        """
+    )
+
+    get_email_parser.add_argument(
+        "--alias",
+        required=True,
+        help="Alias to look up (case-insensitive, can be multi-word)"
+    )
+
+    get_email_parser.set_defaults(func=cmd_get_email)
 
     # Parse arguments
     args = parser.parse_args()

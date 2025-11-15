@@ -23,7 +23,7 @@ def test_alias_lookup():
         ("john", "john.doe@example.com"),
         ("John", "john.doe@example.com"),  # Case insensitive
         ("JOHN DOE", "john.doe@example.com"),  # Case insensitive multi-word
-        ("alice smith", "alice.smith@example.com"),
+        ("alice wonder", "alice.wonder@example.com"),
         ("jd", "john.doe@example.com"),
         ("bob", "bob.wilson@example.com"),
     ]
@@ -49,6 +49,24 @@ def test_alias_lookup():
     ]
 
     for alias, expected_email in auto_alias_test_cases:
+        try:
+            email = get_email_by_alias(alias)
+            status = "✓" if email == expected_email else "✗"
+            print(f"{status} Alias '{alias}' -> {email} (expected: {expected_email})")
+        except ValueError as e:
+            print(f"✗ Alias '{alias}' -> Error: {e}")
+
+    print("\nTesting combined aliases (explicit + auto-generated):\n")
+    combined_test_cases = [
+        # For bill.gates@example.com = boss
+        # Should work with: "bill", "gates", "bill gates" (auto) + "boss" (explicit)
+        ("bill", "bill.gates@example.com"),
+        ("gates", "bill.gates@example.com"),
+        ("bill gates", "bill.gates@example.com"),
+        ("boss", "bill.gates@example.com"),
+    ]
+
+    for alias, expected_email in combined_test_cases:
         try:
             email = get_email_by_alias(alias)
             status = "✓" if email == expected_email else "✗"
