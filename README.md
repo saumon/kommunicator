@@ -10,6 +10,7 @@ Kommunicator is an MCP server that provides email sending capabilities through M
 
 - 🔧 A `get_status` tool to check server status
 - 📧 A `send_email` tool to send emails via Teams webhook
+- 👥 Human-friendly email aliases system
 - 💻 Command-line interface for standalone email sending
 - 🚀 Uses FastMCP for simplified setup
 - 📡 Communication via stdio
@@ -50,6 +51,74 @@ export TEAMS_WEBHOOK_KOMMUNICATOR='https://your-teams-webhook-url'
 ```
 
 **For persistent configuration**, you can create a `.env` file or add it to your shell profile (`~/.zshrc`, `~/.bashrc`, etc.).
+
+### Human Aliases Configuration
+
+The `conf/humans.conf` file allows you to map human-friendly aliases to email addresses, making it easier to send emails without remembering full email addresses.
+
+**Configuration file format:**
+
+```ini
+# conf/humans.conf
+# Format: email = alias1, alias2, alias3
+
+# Explicit aliases
+john.doe@example.com = john, john doe, jd
+alice.smith@example.com = alice, alice smith
+bob@example.com = bob, bobby
+
+# Auto-generated aliases (no explicit aliases needed)
+toto.smith@example.com = 
+momo.salam-ext@example.com = 
+```
+
+**Setup:**
+
+1. Copy the example configuration:
+
+   ```bash
+   cp conf/humans.conf.example conf/humans.conf
+   ```
+
+2. Edit `conf/humans.conf` and add your email-to-alias mappings
+
+**Features:**
+
+- **Case-insensitive**: Aliases like "John", "john", and "JOHN" all work
+- **Multi-word aliases**: Support for aliases like "john doe"
+- **Multiple aliases**: One email can have several aliases
+- **Auto-generated aliases**: For emails without explicit aliases, the system automatically generates aliases from the email parts:
+  - `toto.smith@example.com =` can be found by: "toto", "smith", or "toto smith"
+  - `momo.salam-ext@example.com =` can be found by: "momo", "salam", or "momo salam"
+  - Common suffixes like `-ext`, `-int`, `-temp` are automatically filtered out
+- **Duplicate detection**: When multiple emails share a common part, that part is skipped to avoid ambiguity:
+  - With `roger.moore@example.com =` and `roger.rabbit@example.com =`:
+    - "roger" is ambiguous → will fail (not unique)
+    - "moore" → finds `roger.moore@example.com` ✓
+    - "roger moore" → finds `roger.moore@example.com` ✓
+    - "rabbit" → finds `roger.rabbit@example.com` ✓
+    - "roger rabbit" → finds `roger.rabbit@example.com` ✓
+
+**Using aliases programmatically:**
+
+```python
+from utils import get_email_by_alias
+
+# Look up email by explicit alias
+email = get_email_by_alias("john")  # Returns "john.doe@example.com"
+email = get_email_by_alias("John Doe")  # Case-insensitive, returns same email
+
+# Look up email by auto-generated alias
+email = get_email_by_alias("toto")  # Returns "toto.smith@example.com"
+email = get_email_by_alias("smith")  # Returns "toto.smith@example.com"
+email = get_email_by_alias("toto smith")  # Returns "toto.smith@example.com"
+
+# Duplicate handling
+email = get_email_by_alias("moore")  # Returns "roger.moore@example.com"
+email = get_email_by_alias("roger")  # Raises ValueError - ambiguous!
+```
+
+**Note:** The configuration is cached on first load for performance.
 
 ## Usage
 
@@ -197,8 +266,13 @@ send_email(
 kommunicator/
 ├── kommunicator-mcp.py    # Main MCP server
 ├── kommunicator-cli.py    # Command-line interface
-├── utils.py               # Email sending utilities
+├── utils.py               # Email sending and alias utilities
 ├── logging_config.py      # Logging configuration
+├── conf/
+│   ├── humans.conf        # Email-to-alias mappings (user-configured)
+│   └── humans.conf.example # Example configuration file
+├── tests/
+│   └── test_humans.py     # Test script for alias resolution
 ├── pyproject.toml         # Project configuration
 ├── kommunicator.log       # Log file (generated at runtime)
 └── README.md              # Documentation
@@ -229,6 +303,23 @@ def my_new_tool(param1: str) -> str:
     """Tool description"""
     return f"Result: {param1}"
 ```
+
+### Testing Alias Resolution
+
+To test the human alias resolution system:
+
+```bash
+# Make sure conf/humans.conf exists with some test data
+cp conf/humans.conf.example conf/humans.conf
+
+# Run the test script
+./tests/test_humans.py
+
+# Or with uv
+uv run tests/test_humans.py
+```
+
+The test script will validate that aliases are correctly resolved to email addresses.
 
 ## License
 

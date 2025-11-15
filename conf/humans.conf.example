@@ -1,0 +1,32 @@
+# Humans Configuration - Example
+# Copy this file to humans.conf and customize it with your own mappings
+# Format: email = alias1, alias2, alias3
+# Each line maps an email address to one or more aliases (comma-separated)
+# Aliases are case-insensitive and can be multiple words
+# Empty aliases are allowed - auto-generated from email parts
+
+# Examples with explicit aliases:
+john.doe@example.com = john, john doe, jd
+alice.smith@example.com = alice, alice smith, as
+bob.wilson@example.com = bob, bobby, bob wilson
+jane@example.com = jane
+
+# Examples with auto-generated aliases (no explicit aliases):
+# toto.smith@example.com can be found by: "toto", "smith", or "toto smith"
+toto.smith@example.com =
+
+# momo.salam-ext@example.com can be found by: "momo", "salam", or "momo salam"
+# Note: common suffixes like "-ext", "-int" are automatically filtered
+momo.salam-ext@example.com = 
+
+# Examples with duplicate handling:
+# When multiple emails share a common part, that part becomes ambiguous
+# roger.moore@example.com can be found by: "moore" or "roger moore" (but NOT "roger" - ambiguous)
+roger.moore@example.com = 
+
+# roger.rabbit@example.com can be found by: "rabbit" or "roger rabbit" (but NOT "roger" - ambiguous)
+roger.rabbit@example.com = 
+
+# Add your email-to-alias mappings below:
+
+charlie.brown@example.com = 
