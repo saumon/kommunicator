@@ -150,7 +150,7 @@ The CLI allows you to send emails directly from the command line without running
 
 **Send-email command options:**
 
-- `--to` (required): Recipient email address
+- `--to` (required): Recipient email address or alias
 - `--subject` (required): Email subject
 - `--body` (optional): Email body content. If not provided, reads from stdin
 
@@ -161,8 +161,14 @@ The CLI allows you to send emails directly from the command line without running
 **Examples:**
 
 ```bash
-# Simple email
+# Simple email with email address
 ./kommunicator-cli.py send-email --to user@example.com --subject "Hello" --body "Hello World!"
+
+# Send email using an alias (no need for get-email!)
+./kommunicator-cli.py send-email --to john --subject "Hello" --body "Hello John!"
+
+# Send email using multi-word alias
+./kommunicator-cli.py send-email --to "john doe" --subject "Meeting" --body "See you at 2pm"
 
 # Email with message from stdin
 echo "Meeting at 2pm" | ./kommunicator-cli.py send-email --to user@example.com --subject "Reminder"
@@ -179,16 +185,16 @@ cat report.txt | ./kommunicator-cli.py send-email --to user@example.com --subjec
 # Look up email by auto-generated alias
 ./kommunicator-cli.py get-email --alias "moore"
 
-# Combine get-email with send-email command
+# Combine get-email with send-email command (optional, can use alias directly)
 email=$(./kommunicator-cli.py get-email --alias "john")
 ./kommunicator-cli.py send-email --to "$email" --subject "Hello" --body "Message"
 
 # Verbose mode
-./kommunicator-cli.py -v send-email --to user@example.com --subject "Test" --body "Test"
+./kommunicator-cli.py -v send-email --to john --subject "Test" --body "Test"
 ./kommunicator-cli.py -v get-email --alias "john"
 
 # Using with uv
-uv run kommunicator-cli.py send-email --to user@example.com --subject "Hello" --body "Test"
+uv run kommunicator-cli.py send-email --to john --subject "Hello" --body "Test"
 uv run kommunicator-cli.py get-email --alias "john"
 
 # Show help for commands
@@ -263,7 +269,7 @@ Send an email to a recipient via Teams webhook.
 
 **Parameters:**
 
-- `to` (string, required): Recipient email address
+- `to` (string, required): Recipient email address or alias
 - `subject` (string, required): Email subject
 - `body` (string, required): Email body content (supports `\n` for line breaks, automatically converted to `<br>`)
 
@@ -273,13 +279,28 @@ Send an email to a recipient via Teams webhook.
 - Success: `"Email sent successfully to {email}"`
 - Error: `"Error sending email: {error_message}"`
 
-**Example:**
+**Examples:**
 
 ```python
+# Send email using email address
 send_email(
     to="user@example.com",
     subject="Meeting Reminder",
     body="Don't forget our meeting at 2 PM today.\nSee you there!"
+)
+
+# Send email using alias
+send_email(
+    to="john",
+    subject="Hello John",
+    body="Quick update for you."
+)
+
+# Send email using multi-word alias
+send_email(
+    to="john doe",
+    subject="Meeting",
+    body="See you at 2pm"
 )
 ```
 
