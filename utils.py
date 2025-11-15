@@ -14,36 +14,36 @@ _all_emails = None
 def _extract_email_parts(email: str) -> list:
     """
     Extract searchable parts from an email address.
-    
+
     Args:
         email: Email address
-        
+
     Returns:
         list: List of searchable parts (lowercase)
-        
+
     Example:
         "toto.smith@example.com" -> ["toto", "smith", "toto smith"]
         "momo.salam-ext@example.com" -> ["momo", "salam", "momo salam"]
     """
     # Get the local part (before @)
     local_part = email.split('@')[0]
-    
+
     # Split by common separators (., -, _)
     parts = re.split(r'[.\-_]', local_part)
-    
+
     # Filter out common suffixes like 'ext', 'int', etc.
     filtered_parts = [p for p in parts if p and p.lower() not in ['ext', 'int', 'temp']]
-    
+
     searchable_parts = []
-    
+
     # Add individual parts
     for part in filtered_parts:
         searchable_parts.append(part.lower())
-    
+
     # Add combination of all parts (space-separated)
     if len(filtered_parts) > 1:
         searchable_parts.append(' '.join(filtered_parts).lower())
-    
+
     return searchable_parts
 
 
@@ -63,7 +63,7 @@ def _load_humans_config():
     config_file = Path(__file__).parent / "conf" / "humans.conf"
     _humans_config = {}
     _all_emails = []
-    
+
     # Track duplicates to avoid ambiguous aliases
     _alias_counts = {}
 
@@ -74,7 +74,7 @@ def _load_humans_config():
     try:
         # First pass: collect all aliases and count duplicates
         temp_aliases = {}
-        
+
         with open(config_file, 'r', encoding='utf-8') as f:
             for line_number, line in enumerate(f, 1):
                 # Skip comments and empty lines
@@ -100,25 +100,28 @@ def _load_humans_config():
 
                 # Collect all potential aliases for this email
                 potential_aliases = []
-                
-                # Parse aliases (can be empty)
+
+                # Always generate aliases from email parts
+                email_parts = _extract_email_parts(email)
+                potential_aliases.extend(email_parts)
+
+                # Parse explicit aliases and add them as well
                 aliases_str = aliases_str.strip()
                 if aliases_str:
-                    # Has explicit aliases
+                    # Has explicit aliases - add them too
                     aliases = [alias.strip() for alias in aliases_str.split(',')]
                     potential_aliases.extend([a.lower() for a in aliases if a])
-                else:
-                    # No explicit aliases, generate from email parts
-                    email_parts = _extract_email_parts(email)
-                    potential_aliases.extend(email_parts)
-                
+
+                # Deduplicate aliases for this email (to avoid counting same alias twice)
+                potential_aliases = list(set(potential_aliases))
+
                 # Store email with its potential aliases
                 temp_aliases[email] = potential_aliases
-                
+
                 # Count occurrences of each alias
                 for alias in potential_aliases:
                     _alias_counts[alias] = _alias_counts.get(alias, 0) + 1
-        
+
         # Second pass: add only non-ambiguous aliases
         for email, aliases in temp_aliases.items():
             for alias in aliases:
@@ -127,7 +130,7 @@ def _load_humans_config():
                     _humans_config[alias] = email
                 else:
                     logger.debug(f"Skipping ambiguous alias '{alias}' (appears in multiple emails)")
-            
+
             # Also map email to itself for direct email lookup
             _humans_config[email.lower()] = email
 
@@ -143,11 +146,11 @@ def _load_humans_config():
 def get_email_by_alias(alias: str) -> str:
     """
     Get email address by alias.
-    
+
     Supports:
     - Explicit aliases defined in humans.conf
     - Auto-generated aliases from email parts (for emails without explicit aliases)
-    
+
     Examples:
         For "toto.smith@example.com =":
         - "toto" -> toto.smith@example.com

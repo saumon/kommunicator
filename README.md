@@ -64,8 +64,8 @@ The `conf/humans.conf` file allows you to map human-friendly aliases to email ad
 
 # Explicit aliases
 john.doe@example.com = john, john doe, jd
-alice.smith@example.com = alice, alice smith
-bob@example.com = bob, bobby
+alice.wonder@example.com = alice, alice wonder, aw
+bob.wilson@example.com = bob, bobby
 
 # Auto-generated aliases (no explicit aliases needed)
 toto.smith@example.com = 
@@ -87,9 +87,10 @@ momo.salam-ext@example.com =
 - **Case-insensitive**: Aliases like "John", "john", and "JOHN" all work
 - **Multi-word aliases**: Support for aliases like "john doe"
 - **Multiple aliases**: One email can have several aliases
-- **Auto-generated aliases**: For emails without explicit aliases, the system automatically generates aliases from the email parts:
+- **Auto-generated aliases**: Aliases are **always** automatically generated from email parts, even when explicit aliases are provided:
   - `toto.smith@example.com =` can be found by: "toto", "smith", or "toto smith"
   - `momo.salam-ext@example.com =` can be found by: "momo", "salam", or "momo salam"
+  - `bill.gates@example.com = boss` can be found by: "bill", "gates", "bill gates", **or** "boss"
   - Common suffixes like `-ext`, `-int`, `-temp` are automatically filtered out
 - **Duplicate detection**: When multiple emails share a common part, that part is skipped to avoid ambiguity:
   - With `roger.moore@example.com =` and `roger.rabbit@example.com =`:
@@ -113,6 +114,11 @@ email = get_email_by_alias("toto")  # Returns "toto.smith@example.com"
 email = get_email_by_alias("smith")  # Returns "toto.smith@example.com"
 email = get_email_by_alias("toto smith")  # Returns "toto.smith@example.com"
 
+# Combined: explicit + auto-generated aliases
+email = get_email_by_alias("bill")  # Returns "bill.gates@example.com" (auto-generated)
+email = get_email_by_alias("gates")  # Returns "bill.gates@example.com" (auto-generated)
+email = get_email_by_alias("boss")  # Returns "bill.gates@example.com" (explicit)
+
 # Duplicate handling
 email = get_email_by_alias("moore")  # Returns "roger.moore@example.com"
 email = get_email_by_alias("roger")  # Raises ValueError - ambiguous!
@@ -135,6 +141,7 @@ The CLI allows you to send emails directly from the command line without running
 **Available commands:**
 
 - `email`: Send an email via Teams webhook
+- `get-email`: Look up email address by alias
 
 **Global options:**
 
@@ -146,6 +153,10 @@ The CLI allows you to send emails directly from the command line without running
 - `--to` (required): Recipient email address
 - `--subject` (required): Email subject
 - `--body` (optional): Email body content. If not provided, reads from stdin
+
+**Get-email command options:**
+
+- `--alias` (required): Alias to look up (case-insensitive, can be multi-word)
 
 **Examples:**
 
@@ -159,17 +170,33 @@ echo "Meeting at 2pm" | ./kommunicator-cli.py email --to user@example.com --subj
 # Email with message from file
 cat report.txt | ./kommunicator-cli.py email --to user@example.com --subject "Daily Report"
 
+# Look up email by alias
+./kommunicator-cli.py get-email --alias "john"
+
+# Look up email by multi-word alias
+./kommunicator-cli.py get-email --alias "john smith"
+
+# Look up email by auto-generated alias
+./kommunicator-cli.py get-email --alias "moore"
+
+# Combine get-email with email command
+email=$(./kommunicator-cli.py get-email --alias "john")
+./kommunicator-cli.py email --to "$email" --subject "Hello" --body "Message"
+
 # Verbose mode
 ./kommunicator-cli.py -v email --to user@example.com --subject "Test" --body "Test"
+./kommunicator-cli.py -v get-email --alias "john"
 
 # Using with uv
 uv run kommunicator-cli.py email --to user@example.com --subject "Hello" --body "Test"
+uv run kommunicator-cli.py get-email --alias "john"
 
-# Show help for email command
+# Show help for commands
 ./kommunicator-cli.py email --help
+./kommunicator-cli.py get-email --help
 ```
 
-**Note:** The CLI requires the same `TEAMS_WEBHOOK_KOMMUNICATOR` environment variable as the MCP server.
+**Note:** The CLI requires the same `TEAMS_WEBHOOK_KOMMUNICATOR` environment variable as the MCP server. The `get-email` command uses the `conf/humans.conf` configuration file.
 
 ### Running the MCP Server
 

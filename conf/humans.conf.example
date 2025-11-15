@@ -3,15 +3,29 @@
 # Format: email = alias1, alias2, alias3
 # Each line maps an email address to one or more aliases (comma-separated)
 # Aliases are case-insensitive and can be multiple words
-# Empty aliases are allowed - auto-generated from email parts
+# 
+# IMPORTANT: Auto-generated aliases are ALWAYS created from email parts,
+# even when explicit aliases are provided!
 
 # Examples with explicit aliases:
+# john.doe@example.com can be found by: "john", "doe", "john doe", "jd"
+# (both auto-generated from email AND explicit alias "jd")
 john.doe@example.com = john, john doe, jd
-alice.smith@example.com = alice, alice smith, as
+
+# alice.wonder@example.com can be found by: "alice", "wonder", "alice wonder", "aw"
+alice.wonder@example.com = alice, alice wonder, aw
+
+# bob.wilson@example.com can be found by: "bob", "wilson", "bob wilson", "bobby"
 bob.wilson@example.com = bob, bobby, bob wilson
+
+# jane@example.com can be found by: "jane" (from email and explicit alias)
 jane@example.com = jane
 
-# Examples with auto-generated aliases (no explicit aliases):
+# bill.gates@example.com can be found by: "bill", "gates", "bill gates", "boss"
+# (auto-generated parts + explicit alias "boss")
+bill.gates@example.com = boss
+
+# Examples with auto-generated aliases only (no explicit aliases):
 # toto.smith@example.com can be found by: "toto", "smith", or "toto smith"
 toto.smith@example.com =
 
@@ -29,4 +43,4 @@ roger.rabbit@example.com =
 
 # Add your email-to-alias mappings below:
 
-charlie.brown@example.com = 
+charlie.brown@example.com =
