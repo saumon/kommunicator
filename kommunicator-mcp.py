@@ -17,7 +17,7 @@ def send_email(to: str, subject: str, body: str) -> str:
     Send an email to a recipient.
 
     Args:
-        to: Recipient email address
+        to: Recipient email address or alias
         subject: Email subject
         body: Email body content
 
