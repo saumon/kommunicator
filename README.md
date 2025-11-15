@@ -9,8 +9,8 @@ Kommunicator is an MCP server that provides email sending capabilities through M
 ## Features
 
 - 🔧 A `get_status` tool to check server status
-- 📧 A `send_email` tool to send emails via Teams webhook
-- 👥 Human-friendly email aliases system
+- 📧 A `send_email` tool to send emails via Teams webhook (supports email addresses and aliases)
+- 👥 Human-friendly email aliases system with automatic resolution
 - 💻 Command-line interface for standalone email sending
 - 🚀 Uses FastMCP for simplified setup
 - 📡 Communication via stdio
