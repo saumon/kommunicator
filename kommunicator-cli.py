@@ -99,21 +99,21 @@ def main():
         help="Command to execute"
     )
 
-    # Email command
+    # Send-email command
     email_parser = subparsers.add_parser(
-        "email",
+        "send-email",
         help="Send an email via Teams webhook",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
   # Send a simple email
-  %(prog)s email --to user@example.com --subject "Meeting" --body "Meeting at 2pm"
+  kommunicator-cli send-email --to user@example.com --subject "Meeting" --body "Meeting at 2pm"
 
   # Send email with message from stdin
-  echo "Hello World" | %(prog)s email --to user@example.com --subject "Greeting"
+  echo "Hello World" | kommunicator-cli send-email --to user@example.com --subject "Greeting"
 
   # Send email with message from file
-  cat message.txt | %(prog)s email --to user@example.com --subject "Report"
+  cat message.txt | kommunicator-cli send-email --to user@example.com --subject "Report"
 
 Environment Variables:
   TEAMS_WEBHOOK_KOMMUNICATOR - Required Teams webhook URL
@@ -147,13 +147,13 @@ Environment Variables:
         epilog="""
 Examples:
   # Look up email by alias
-  %(prog)s get-email --alias "john"
+  kommunicator-cli get-email --alias "john"
 
   # Look up email by multi-word alias
-  %(prog)s get-email --alias "john smith"
+  kommunicator-cli get-email --alias "john smith"
 
   # Look up email by auto-generated alias
-  %(prog)s get-email --alias "moore"
+  kommunicator-cli get-email --alias "moore"
 
 Configuration:
   Uses conf/humans.conf for alias-to-email mappings
