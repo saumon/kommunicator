@@ -4,14 +4,16 @@ A simple MCP (Model Context Protocol) server built with FastMCP.
 
 ## Description
 
-Kommunicator is an MCP server that provides email and Teams messaging capabilities through Microsoft Teams webhooks. It exposes tools for checking server status, sending emails, and sending Teams messages to recipients, and includes a command-line interface for standalone usage.
+Kommunicator is an MCP server that provides email and Teams messaging capabilities through Microsoft Teams webhooks. It exposes tools for checking server status, sending emails, and sending Teams messages to users, conversations, and channels, and includes a command-line interface for standalone usage.
 
 ## Features
 
 - 🔧 A `get_status` tool to check server status
 - 📧 A `send_email` tool to send emails via Teams webhook (supports email addresses and aliases)
-- 💬 A `send_teams` tool to send Teams messages to users (supports email addresses, aliases, and bot mode)
+- 💬 A `send_teams` tool to send Teams messages to users, conversations, and channels (supports aliases and auto-detection)
 - 👥 Human-friendly email aliases system with automatic resolution
+- 🗣️ Conversation and channel name mapping for easy group messaging
+- 🎯 Automatic target detection (user/conversation/channel) based on recipient
 - 💻 Command-line interface for standalone email and Teams message sending
 - 🚀 Uses FastMCP for simplified setup
 - 📡 Communication via stdio
@@ -55,7 +57,7 @@ export TEAMS_WEBHOOK_KOMMUNICATOR='https://your-teams-webhook-url'
 
 ### Human Aliases Configuration
 
-The `conf/humans.conf` file allows you to map human-friendly aliases to email addresses, making it easier to send emails without remembering full email addresses.
+The `conf/humans.conf` file allows you to map human-friendly aliases to email addresses, making it easier to send messages to users without remembering full email addresses.
 
 **Configuration file format:**
 
@@ -98,8 +100,46 @@ momo.salam-ext@example.com =
     - "roger" is ambiguous → will fail (not unique)
     - "moore" → finds `roger.moore@example.com` ✓
     - "roger moore" → finds `roger.moore@example.com` ✓
-    - "rabbit" → finds `roger.rabbit@example.com` ✓
-    - "roger rabbit" → finds `roger.rabbit@example.com` ✓
+
+### Conversations and Channels Configuration
+
+The `conf/conversations.conf` file allows you to map friendly names to Teams conversation and channel IDs, making it easier to send messages to groups without remembering long IDs.
+
+**Configuration file format:**
+
+```ini
+# conf/conversations.conf
+# Format for conversations: NAME=CONVERSATION_ID
+# Format for channels: NAME=CONVERSATION_ID|TEAM_ID
+
+# Conversations/Groups
+Equipe_Dev=19:meeting_abc123def456@thread.skype
+Support_Client=19:meeting_def456ghi789@thread.skype
+
+# Channels (require teamId)
+Canal_General=19:meeting_abc123@thread.skype|19:team_def456ghi789@thread.tacv2
+Canal_Dev=19:meeting_def456@thread.skype|19:team_abc123def456@thread.tacv2
+```
+
+**Setup:**
+
+1. Copy the example configuration:
+
+   ```bash
+   cp conf/conversations.conf.example conf/conversations.conf
+   ```
+
+2. Edit `conf/conversations.conf` and add your conversation/channel mappings
+
+**Features:**
+
+- **Conversations/Groups**: Simple format with just the conversation ID
+- **Team Channels**: Format with conversation ID and team ID separated by `|`
+- **Case-insensitive**: Names like "Equipe_Dev", "equipe_dev" all work
+- **Automatic detection**: The system automatically detects if the target is a conversation or a channel based on the configuration
+- **Flexible naming**: Use underscores or spaces in names (spaces are converted to underscores internally)
+  - "rabbit" → finds `roger.rabbit@example.com` ✓
+  - "roger rabbit" → finds `roger.rabbit@example.com` ✓
 
 **Using aliases programmatically:**
 
@@ -158,12 +198,22 @@ The CLI allows you to send emails directly from the command line without running
 
 **Send-teams command options:**
 
-- `--to` (required): Recipient email address or alias
+- `--to` (required): Recipient - can be:
+  - Email address (`user@example.com`)
+  - User alias from `humans.conf` (`john`, `john doe`)
+  - Conversation name from `conversations.conf` (`Equipe_Dev`, `Support_Client`)
+  - Channel name from `conversations.conf` (`Canal_General`)
 - `--message` (optional): Message content. If not provided, reads from stdin
 - `--format` (optional): Message format - `auto` (auto-detect, default), `message` for plain text, or `adaptivecard` for Adaptive Card
 - `--bot` (optional): Mark the message as coming from a bot (automatic/system message)
 
 **Note on format auto-detection:** When `--format` is set to `auto` (default), the command automatically detects Adaptive Cards by checking if the message is valid JSON containing `"type": "AdaptiveCard"`. This means you can send Adaptive Cards without explicitly specifying `--format adaptivecard`.
+
+**Note on recipient resolution:** The `--to` parameter automatically detects the target type:
+
+1. First checks if it matches a conversation/channel name in `conversations.conf`
+2. If not found, checks if it's an email address or user alias in `humans.conf`
+3. Automatically selects the appropriate Teams target (`teams-message`, `teams-conversation`, or `teams-canal`)
 
 **Get-email command options:**
 
@@ -195,6 +245,15 @@ cat report.txt | ./kommunicator-cli.py send-email --to user@example.com --subjec
 
 # Send Teams message using multi-word alias
 ./kommunicator-cli.py send-teams --to "john doe" --message "Quick reminder"
+
+# Send Teams message to a conversation/group
+./kommunicator-cli.py send-teams --to "Equipe_Dev" --message "Team meeting at 3pm"
+
+# Send Teams message to a channel
+./kommunicator-cli.py send-teams --to "Canal_General" --message "Important announcement"
+
+# Send Adaptive Card to a channel
+cat messages/adaptivecard.json.sample | ./kommunicator-cli.py send-teams --to "Canal_Dev"
 
 # Send Teams message from stdin
 echo "Hello World" | ./kommunicator-cli.py send-teams --to john
@@ -352,11 +411,15 @@ send_email(
 
 ### `send_teams`
 
-Send a Teams message to a user.
+Send a Teams message to a user, conversation, or channel.
 
 **Parameters:**
 
-- `to` (string, required): Recipient email address or alias
+- `to` (string, required): Recipient - can be:
+  - Email address (`user@example.com`)
+  - User alias from `humans.conf` (`john`, `john doe`)
+  - Conversation name from `conversations.conf` (`Equipe_Dev`, `Support_Client`)
+  - Channel name from `conversations.conf` (`Canal_General`)
 - `message` (string, required): Message content (plain text or Adaptive Card JSON)
 - `bot` (boolean, optional): Whether the message is from a bot (default: False)
 - `format` (string, optional): Message format - `auto` (auto-detect, default), `message` for plain text, or `adaptivecard` for Adaptive Card
@@ -364,10 +427,16 @@ Send a Teams message to a user.
 **Returns:**
 
 - Type: `string`
-- Success: `"Teams message sent successfully to {email}"`
+- Success: `"Teams message sent successfully to {target}"`
 - Error: `"Error sending Teams message: {error_message}"`
 
 **Format auto-detection:** When `format` is `auto` (default), the tool automatically detects Adaptive Cards by checking if the message is valid JSON containing `"type": "AdaptiveCard"`.
+
+**Target auto-detection:** The tool automatically detects the target type:
+
+1. First checks if it matches a conversation/channel name in `conversations.conf`
+2. If not found, checks if it's an email address or user alias in `humans.conf`
+3. Automatically selects the appropriate Teams target (`teams-message`, `teams-conversation`, or `teams-canal`)
 
 **Examples:**
 
@@ -423,6 +492,24 @@ send_teams(
     message=adaptive_card_json,
     format="adaptivecard"
 )
+
+# Send message to a conversation/group
+send_teams(
+    to="Equipe_Dev",
+    message="Team meeting at 3pm"
+)
+
+# Send message to a channel
+send_teams(
+    to="Canal_General",
+    message="Important announcement"
+)
+
+# Send Adaptive Card to a channel
+send_teams(
+    to="Canal_Dev",
+    message=adaptive_card_json
+)
 ```
 
 **Note:** Requires `TEAMS_WEBHOOK_KOMMUNICATOR` environment variable to be set.
@@ -438,8 +525,10 @@ kommunicator/
 ├── utils.py               # Email sending and alias utilities
 ├── logging_config.py      # Logging configuration
 ├── conf/
-│   ├── humans.conf        # Email-to-alias mappings (user-configured)
-│   └── humans.conf.example # Example configuration file
+│   ├── humans.conf                  # Email-to-alias mappings (user-configured)
+│   ├── humans.conf.example          # Example configuration file
+│   ├── conversations.conf           # Conversation/channel mappings (user-configured)
+│   └── conversations.conf.example   # Example configuration file
 ├── messages/              # Sample message templates
 │   ├── message.txt.sample           # Plain text message example
 │   └── adaptivecard.json.sample     # Adaptive Card JSON example

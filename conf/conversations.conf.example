@@ -1,0 +1,42 @@
+# Configuration des correspondances nom => ID de conversation Teams
+# Ce fichier permet de configurer deux types de cibles Teams :
+#
+# 1. CONVERSATIONS/GROUPES (format simple)
+#    Format: NOM_CONVERSATION=CONVERSATION_ID
+#    Utilisation: Messages et cartes vers des conversations ou groupes Teams
+#    
+# 2. CANAUX D'ÉQUIPE (format avec teamId)
+#    Format: NOM_CANAL=CONVERSATION_ID|TEAM_ID
+#    Utilisation: Messages et cartes vers des canaux spécifiques d'une équipe Teams
+#
+# Les noms peuvent contenir des espaces, utilisez des underscores ou des tirets
+# Les IDs peuvent avoir différents formats selon votre environnement Teams
+
+# ============================================================================
+# CONVERSATIONS/GROUPES TEAMS (mode conversation)
+# Format: NOM=CONVERSATION_ID (format flexible selon votre environnement)
+# ============================================================================
+Equipe_Dev=19:meeting_abc123def456@thread.skype
+Support_Client=19:meeting_def456ghi789@thread.skype
+Pole_Marketing=19:meeting_ghi789jkl012@thread.skype
+Projet_Alpha=19:meeting_jkl012mno345@thread.skype
+Test_Team=19:meeting_mno345pqr678@thread.skype
+Equipe_Support_Niveau_2=19:meeting_pqr678stu901@thread.skype
+
+# ============================================================================
+# CANAUX D'ÉQUIPE TEAMS (mode canal)
+# Format: NOM=CONVERSATION_ID|TEAM_ID (formats flexibles selon votre environnement)
+# ============================================================================
+Canal_General=19:meeting_abc123@thread.skype|19:team_def456ghi789@thread.tacv2
+Canal_Dev=19:meeting_def456@thread.skype|19:team_abc123def456@thread.tacv2
+Canal_Annonces=19:meeting_ghi789@thread.skype|19:team_jkl012mno345@thread.tacv2
+Canal_Support=19:meeting_support123@thread.skype|19:team_support456@thread.tacv2
+
+# ============================================================================
+# NOTES D'UTILISATION
+# ============================================================================
+# - Les conversations utilisent uniquement l'ID de conversation
+# - Les canaux nécessitent l'ID de conversation ET l'ID d'équipe (séparés par |)
+# - Le script détecte automatiquement le type en fonction du format
+# - Commentaires supportés avec #
+# - Les lignes vides sont ignorées

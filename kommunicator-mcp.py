@@ -37,10 +37,14 @@ def send_email(to: str, subject: str, body: str) -> str:
 @mcp.tool()
 def send_teams(to: str, message: str, bot: bool = False, format: str = "auto") -> str:
     """
-    Send a Teams message to a user.
+    Send a Teams message to a user, conversation, or channel.
 
     Args:
-        to: Recipient email address or alias
+        to: Recipient - can be:
+            - Email address (user@example.com)
+            - User alias from humans.conf (john, john doe)
+            - Conversation name from conversations.conf (Equipe_Dev, Support_Client)
+            - Channel name from conversations.conf (Canal_General)
         message: Message content (plain text or Adaptive Card JSON)
         bot: Whether the message is from a bot (default: False)
         format: Message format - 'auto' (auto-detect, default), 'message' for plain text, or 'adaptivecard' for Adaptive Card
