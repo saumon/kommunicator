@@ -141,6 +141,7 @@ The CLI allows you to send emails directly from the command line without running
 **Available commands:**
 
 - `send-email`: Send an email via Teams webhook
+- `send-teams`: Send a Teams message to a user
 - `get-email`: Look up email address by alias
 
 **Global options:**
@@ -153,6 +154,12 @@ The CLI allows you to send emails directly from the command line without running
 - `--to` (required): Recipient email address or alias
 - `--subject` (required): Email subject
 - `--body` (optional): Email body content. If not provided, reads from stdin
+
+**Send-teams command options:**
+
+- `--to` (required): Recipient email address or alias
+- `--message` (optional): Message content. If not provided, reads from stdin
+- `--bot` (optional): Mark the message as coming from a bot (automatic/system message)
 
 **Get-email command options:**
 
@@ -176,6 +183,24 @@ echo "Meeting at 2pm" | ./kommunicator-cli.py send-email --to user@example.com -
 # Email with message from file
 cat report.txt | ./kommunicator-cli.py send-email --to user@example.com --subject "Daily Report"
 
+# Send a Teams message with email address
+./kommunicator-cli.py send-teams --to user@example.com --message "Hello World"
+
+# Send Teams message using an alias
+./kommunicator-cli.py send-teams --to john --message "Meeting at 2pm"
+
+# Send Teams message using multi-word alias
+./kommunicator-cli.py send-teams --to "john doe" --message "Quick reminder"
+
+# Send Teams message from stdin
+echo "Hello World" | ./kommunicator-cli.py send-teams --to john
+
+# Send Teams message from file
+cat message.txt | ./kommunicator-cli.py send-teams --to user@example.com
+
+# Send bot message (automatic/system message)
+./kommunicator-cli.py send-teams --to john --message "Automatic reminder" --bot
+
 # Look up email by alias
 ./kommunicator-cli.py get-email --alias "john"
 
@@ -191,14 +216,17 @@ email=$(./kommunicator-cli.py get-email --alias "john")
 
 # Verbose mode
 ./kommunicator-cli.py -v send-email --to john --subject "Test" --body "Test"
+./kommunicator-cli.py -v send-teams --to john --message "Test message"
 ./kommunicator-cli.py -v get-email --alias "john"
 
 # Using with uv
 uv run kommunicator-cli.py send-email --to john --subject "Hello" --body "Test"
+uv run kommunicator-cli.py send-teams --to john --message "Hello from uv"
 uv run kommunicator-cli.py get-email --alias "john"
 
 # Show help for commands
 ./kommunicator-cli.py send-email --help
+./kommunicator-cli.py send-teams --help
 ./kommunicator-cli.py get-email --help
 ```
 
