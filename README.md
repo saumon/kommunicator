@@ -357,14 +357,17 @@ Send a Teams message to a user.
 **Parameters:**
 
 - `to` (string, required): Recipient email address or alias
-- `message` (string, required): Message content (supports `\n` for line breaks, automatically converted to `<br>`)
+- `message` (string, required): Message content (plain text or Adaptive Card JSON)
 - `bot` (boolean, optional): Whether the message is from a bot (default: False)
+- `format` (string, optional): Message format - `auto` (auto-detect, default), `message` for plain text, or `adaptivecard` for Adaptive Card
 
 **Returns:**
 
 - Type: `string`
 - Success: `"Teams message sent successfully to {email}"`
 - Error: `"Error sending Teams message: {error_message}"`
+
+**Format auto-detection:** When `format` is `auto` (default), the tool automatically detects Adaptive Cards by checking if the message is valid JSON containing `"type": "AdaptiveCard"`.
 
 **Examples:**
 
@@ -392,6 +395,33 @@ send_teams(
     to="john",
     message="Automatic system alert",
     bot=True
+)
+
+# Send Adaptive Card (auto-detected from JSON content)
+adaptive_card_json = '''
+{
+  "type": "AdaptiveCard",
+  "version": "1.4",
+  "body": [
+    {
+      "type": "TextBlock",
+      "text": "Hello from Adaptive Card!",
+      "weight": "Bolder",
+      "size": "Large"
+    }
+  ]
+}
+'''
+send_teams(
+    to="john",
+    message=adaptive_card_json
+)
+
+# Send Adaptive Card with explicit format
+send_teams(
+    to="john",
+    message=adaptive_card_json,
+    format="adaptivecard"
 )
 ```
 
