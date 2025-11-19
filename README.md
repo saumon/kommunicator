@@ -4,14 +4,15 @@ A simple MCP (Model Context Protocol) server built with FastMCP.
 
 ## Description
 
-Kommunicator is an MCP server that provides email sending capabilities through Microsoft Teams webhooks. It exposes tools for checking server status and sending emails to recipients, and includes a command-line interface for standalone email sending.
+Kommunicator is an MCP server that provides email and Teams messaging capabilities through Microsoft Teams webhooks. It exposes tools for checking server status, sending emails, and sending Teams messages to recipients, and includes a command-line interface for standalone usage.
 
 ## Features
 
 - 🔧 A `get_status` tool to check server status
 - 📧 A `send_email` tool to send emails via Teams webhook (supports email addresses and aliases)
+- 💬 A `send_teams` tool to send Teams messages to users (supports email addresses, aliases, and bot mode)
 - 👥 Human-friendly email aliases system with automatic resolution
-- 💻 Command-line interface for standalone email sending
+- 💻 Command-line interface for standalone email and Teams message sending
 - 🚀 Uses FastMCP for simplified setup
 - 📡 Communication via stdio
 - 📝 Comprehensive logging to file
@@ -329,6 +330,53 @@ send_email(
     to="john doe",
     subject="Meeting",
     body="See you at 2pm"
+)
+```
+
+**Note:** Requires `TEAMS_WEBHOOK_KOMMUNICATOR` environment variable to be set.
+
+### `send_teams`
+
+Send a Teams message to a user.
+
+**Parameters:**
+
+- `to` (string, required): Recipient email address or alias
+- `message` (string, required): Message content (supports `\n` for line breaks, automatically converted to `<br>`)
+- `bot` (boolean, optional): Whether the message is from a bot (default: False)
+
+**Returns:**
+
+- Type: `string`
+- Success: `"Teams message sent successfully to {email}"`
+- Error: `"Error sending Teams message: {error_message}"`
+
+**Examples:**
+
+```python
+# Send Teams message using email address
+send_teams(
+    to="user@example.com",
+    message="Don't forget our meeting at 2 PM today.\nSee you there!"
+)
+
+# Send Teams message using alias
+send_teams(
+    to="john",
+    message="Quick reminder for you."
+)
+
+# Send Teams message using multi-word alias
+send_teams(
+    to="john doe",
+    message="Meeting at 2pm"
+)
+
+# Send bot message (automatic/system message)
+send_teams(
+    to="john",
+    message="Automatic system alert",
+    bot=True
 )
 ```
 
