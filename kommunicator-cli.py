@@ -5,7 +5,7 @@ Kommunicator CLI - Command line interface for interacting with Kommunicator serv
 
 import sys
 import argparse
-from utils import send_email_http, get_email_by_alias
+from utils import send_email_http, get_email_by_alias, send_teams_message
 from logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -73,6 +73,47 @@ def cmd_get_email(args):
     except Exception as e:
         print(f"✗ Unexpected error: {e}", file=sys.stderr)
         logger.error(f"CLI: Unexpected error looking up alias '{args.alias}': {e}", exc_info=True)
+        return 1
+
+
+def cmd_send_teams(args):
+    """Handle the send-teams command."""
+    # Get message from argument or stdin
+    message = args.message
+    if message is None:
+        # Check if stdin is not a terminal (i.e., piped input)
+        if not sys.stdin.isatty():
+            message = sys.stdin.read()
+        else:
+            print("Error: --message is required when not reading from stdin", file=sys.stderr)
+            return 1
+
+    # Validate message is not empty
+    if not message or not message.strip():
+        print("Error: Message cannot be empty", file=sys.stderr)
+        return 1
+
+    try:
+        if args.verbose:
+            print(f"Sending Teams message to: {args.to}")
+            print(f"Bot mode: {args.bot}")
+            print(f"Message length: {len(message)} characters")
+
+        logger.info(f"CLI: Sending Teams message to {args.to} (bot={args.bot})")
+        send_teams_message(args.to, message, args.bot)
+
+        print(f"✓ Teams message sent successfully to {args.to}")
+        logger.info(f"CLI: Teams message sent successfully to {args.to}")
+        return 0
+
+    except ValueError as e:
+        print(f"✗ Configuration error: {e}", file=sys.stderr)
+        logger.error(f"CLI: Configuration error: {e}")
+        return 1
+
+    except Exception as e:
+        print(f"✗ Error sending Teams message: {e}", file=sys.stderr)
+        logger.error(f"CLI: Error sending Teams message: {e}", exc_info=True)
         return 1
 
 
@@ -173,6 +214,55 @@ Configuration:
     )
 
     get_email_parser.set_defaults(func=cmd_get_email)
+
+    # Send-teams command
+    send_teams_parser = subparsers.add_parser(
+        "send-teams",
+        help="Send a Teams message to a user",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  # Send a simple Teams message with email address
+  kommunicator-cli send-teams --to user@example.com --message "Hello World"
+
+  # Send Teams message using an alias
+  kommunicator-cli send-teams --to john --message "Meeting at 2pm"
+
+  # Send Teams message using multi-word alias
+  kommunicator-cli send-teams --to "john doe" --message "Quick reminder"
+
+  # Send message from stdin
+  echo "Hello World" | kommunicator-cli send-teams --to john
+
+  # Send message from file
+  cat message.txt | kommunicator-cli send-teams --to user@example.com
+
+  # Send bot message (automatic/system message)
+  kommunicator-cli send-teams --to john --message "Automatic reminder" --bot
+
+Environment Variables:
+  TEAMS_WEBHOOK_KOMMUNICATOR - Required Teams webhook URL
+        """
+    )
+
+    send_teams_parser.add_argument(
+        "--to",
+        required=True,
+        help="Recipient email address or alias"
+    )
+
+    send_teams_parser.add_argument(
+        "--message",
+        help="Message content (or read from stdin if not provided)"
+    )
+
+    send_teams_parser.add_argument(
+        "--bot",
+        action="store_true",
+        help="Mark the message as coming from a bot"
+    )
+
+    send_teams_parser.set_defaults(func=cmd_send_teams)
 
     # Parse arguments
     args = parser.parse_args()
