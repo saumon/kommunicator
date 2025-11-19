@@ -160,7 +160,10 @@ The CLI allows you to send emails directly from the command line without running
 
 - `--to` (required): Recipient email address or alias
 - `--message` (optional): Message content. If not provided, reads from stdin
+- `--format` (optional): Message format - `auto` (auto-detect, default), `message` for plain text, or `adaptivecard` for Adaptive Card
 - `--bot` (optional): Mark the message as coming from a bot (automatic/system message)
+
+**Note on format auto-detection:** When `--format` is set to `auto` (default), the command automatically detects Adaptive Cards by checking if the message is valid JSON containing `"type": "AdaptiveCard"`. This means you can send Adaptive Cards without explicitly specifying `--format adaptivecard`.
 
 **Get-email command options:**
 
@@ -201,6 +204,18 @@ cat message.txt | ./kommunicator-cli.py send-teams --to user@example.com
 
 # Send bot message (automatic/system message)
 ./kommunicator-cli.py send-teams --to john --message "Automatic reminder" --bot
+
+# Send Adaptive Card (auto-detected from JSON content)
+cat messages/adaptivecard.json.sample | ./kommunicator-cli.py send-teams --to john
+
+# Send Adaptive Card with explicit format
+cat messages/adaptivecard.json.sample | ./kommunicator-cli.py send-teams --to john --format adaptivecard
+
+# Send Adaptive Card with bot mode
+cat messages/adaptivecard.json.sample | ./kommunicator-cli.py send-teams --to user@example.com --bot
+
+# Send plain text message from file
+cat messages/message.txt.sample | ./kommunicator-cli.py send-teams --to john
 
 # Look up email by alias
 ./kommunicator-cli.py get-email --alias "john"
@@ -395,6 +410,9 @@ kommunicator/
 ├── conf/
 │   ├── humans.conf        # Email-to-alias mappings (user-configured)
 │   └── humans.conf.example # Example configuration file
+├── messages/              # Sample message templates
+│   ├── message.txt.sample           # Plain text message example
+│   └── adaptivecard.json.sample     # Adaptive Card JSON example
 ├── tests/
 │   └── test_humans.py     # Test script for alias resolution
 ├── pyproject.toml         # Project configuration
