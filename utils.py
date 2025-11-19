@@ -257,28 +257,51 @@ def send_email_http(to: str, subject: str, body: str) -> None:
         raise Exception(f"Unexpected error sending email: {str(e)}")
 
 
-def send_teams_message(to: str, message: str, bot: bool = False) -> None:
+def send_teams_message(to: str, message: str, bot: bool = False, format: str = "auto") -> None:
     """
     Send a Teams message to a user via Teams webhook.
 
     Args:
         to: Recipient email address or alias
-        message: Message content
+        message: Message content (plain text for 'message' format, JSON string for 'adaptivecard' format)
         bot: Whether the message is from a bot (default: False)
+        format: Message format - 'auto' (auto-detect), 'message' for plain text, or 'adaptivecard' for Adaptive Card (default: 'auto')
 
     Raises:
-        ValueError: If TEAMS_WEBHOOK_KOMMUNICATOR is not set or if alias is not found
+        ValueError: If TEAMS_WEBHOOK_KOMMUNICATOR is not set, if alias is not found, or if format is invalid
         requests.RequestException: If there's an error sending the HTTP request
         Exception: For any other unexpected errors
     """
+    import json
+    
     try:
+        # Auto-detect format if set to 'auto'
+        if format == "auto":
+            # Try to detect if message is an Adaptive Card JSON
+            try:
+                parsed_json = json.loads(message.strip())
+                if isinstance(parsed_json, dict) and parsed_json.get("type") == "AdaptiveCard":
+                    format = "adaptivecard"
+                    logger.info("Auto-detected Adaptive Card format")
+                else:
+                    format = "message"
+                    logger.debug("JSON detected but not an Adaptive Card, using message format")
+            except (json.JSONDecodeError, ValueError):
+                # Not valid JSON, treat as plain text message
+                format = "message"
+                logger.debug("Not valid JSON, using message format")
+        
+        # Validate format
+        if format not in ["message", "adaptivecard"]:
+            raise ValueError(f"Invalid format '{format}'. Must be 'auto', 'message' or 'adaptivecard'")
+
         # If 'to' is not an email address (doesn't contain @), treat it as an alias
         if '@' not in to:
             logger.info(f"'{to}' appears to be an alias, looking up email address")
             to = get_email_by_alias(to)
             logger.info(f"Resolved alias to email: {to}")
 
-        logger.info(f"Attempting to send Teams message to {to}")
+        logger.info(f"Attempting to send Teams {format} to {to}")
 
         # Get webhook URL from environment variable
         webhook_url = os.getenv("TEAMS_WEBHOOK_KOMMUNICATOR")
@@ -291,20 +314,41 @@ def send_teams_message(to: str, message: str, bot: bool = False) -> None:
             logger.error(error_msg)
             raise ValueError(error_msg)
 
-        # Format message: replace newlines with <br>
-        message_formatted = message.replace("\n", "<br>")
+        # Prepare JSON payload based on format
+        if format == "adaptivecard":
+            # Parse the JSON content for adaptive card
+            try:
+                adaptive_card_content = json.loads(message)
+            except json.JSONDecodeError as e:
+                logger.error(f"Invalid JSON for adaptive card: {str(e)}")
+                raise ValueError(f"Invalid JSON for adaptive card: {str(e)}")
 
-        # Prepare JSON payload
-        payload = {
-            "target": "teams-message",
-            "format": "message",
-            "userEmail": to,
-            "message": message_formatted,
-            "bot": str(bot).lower()
-        }
+            payload = {
+                "target": "teams-message",
+                "format": "adaptivecard",
+                "userEmail": to,
+                "bot": str(bot).lower(),
+                "attachments": [
+                    {
+                        "contentType": "application/vnd.microsoft.card.adaptive",
+                        "content": adaptive_card_content
+                    }
+                ]
+            }
+        else:
+            # Format message: replace newlines with <br>
+            message_formatted = message.replace("\n", "<br>")
+
+            payload = {
+                "target": "teams-message",
+                "format": "message",
+                "userEmail": to,
+                "message": message_formatted,
+                "bot": str(bot).lower()
+            }
 
         # Send POST request to webhook
-        logger.debug(f"Sending POST request to webhook with payload: {payload}")
+        logger.debug(f"Sending POST request to webhook with payload: {json.dumps(payload, indent=2)}")
         response = requests.post(
             webhook_url,
             json=payload,
@@ -316,7 +360,7 @@ def send_teams_message(to: str, message: str, bot: bool = False) -> None:
 
         logger.debug(f"Received response: {response.status_code} - {response.text}")
 
-        logger.info(f"Teams message sent successfully to {to}")
+        logger.info(f"Teams {format} sent successfully to {to}")
 
     except ValueError as e:
         logger.error(f"Configuration error: {str(e)}")

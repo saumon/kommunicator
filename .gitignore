@@ -14,3 +14,7 @@ wheels/
 
 # config files
 conf/*.conf
+
+# message files
+messages/*.json
+messages/*.txt

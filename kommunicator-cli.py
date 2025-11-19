@@ -95,15 +95,15 @@ def cmd_send_teams(args):
 
     try:
         if args.verbose:
-            print(f"Sending Teams message to: {args.to}")
+            print(f"Sending Teams {args.format} to: {args.to}")
             print(f"Bot mode: {args.bot}")
             print(f"Message length: {len(message)} characters")
 
-        logger.info(f"CLI: Sending Teams message to {args.to} (bot={args.bot})")
-        send_teams_message(args.to, message, args.bot)
+        logger.info(f"CLI: Sending Teams {args.format} to {args.to} (bot={args.bot})")
+        send_teams_message(args.to, message, args.bot, args.format)
 
-        print(f"✓ Teams message sent successfully to {args.to}")
-        logger.info(f"CLI: Teams message sent successfully to {args.to}")
+        print(f"✓ Teams {args.format} sent successfully to {args.to}")
+        logger.info(f"CLI: Teams {args.format} sent successfully to {args.to}")
         return 0
 
     except ValueError as e:
@@ -240,6 +240,12 @@ Examples:
   # Send bot message (automatic/system message)
   kommunicator-cli send-teams --to john --message "Automatic reminder" --bot
 
+  # Send Adaptive Card from JSON file
+  cat adaptivecard.json | kommunicator-cli send-teams --to john --format adaptivecard
+
+  # Send Adaptive Card with bot mode
+  cat adaptivecard.json | kommunicator-cli send-teams --to john --format adaptivecard --bot
+
 Environment Variables:
   TEAMS_WEBHOOK_KOMMUNICATOR - Required Teams webhook URL
         """
@@ -254,6 +260,13 @@ Environment Variables:
     send_teams_parser.add_argument(
         "--message",
         help="Message content (or read from stdin if not provided)"
+    )
+
+    send_teams_parser.add_argument(
+        "--format",
+        choices=["auto", "message", "adaptivecard"],
+        default="auto",
+        help="Message format: 'auto' (auto-detect, default), 'message' for plain text, or 'adaptivecard' for Adaptive Card"
     )
 
     send_teams_parser.add_argument(
