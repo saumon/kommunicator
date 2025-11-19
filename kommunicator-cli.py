@@ -218,7 +218,7 @@ Configuration:
     # Send-teams command
     send_teams_parser = subparsers.add_parser(
         "send-teams",
-        help="Send a Teams message to a user",
+        help="Send a Teams message to a user, conversation, or channel",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
@@ -231,6 +231,12 @@ Examples:
   # Send Teams message using multi-word alias
   kommunicator-cli send-teams --to "john doe" --message "Quick reminder"
 
+  # Send message to a conversation/group
+  kommunicator-cli send-teams --to "Equipe_Dev" --message "Team meeting at 3pm"
+
+  # Send message to a channel
+  kommunicator-cli send-teams --to "Canal_General" --message "Important announcement"
+
   # Send message from stdin
   echo "Hello World" | kommunicator-cli send-teams --to john
 
@@ -240,11 +246,18 @@ Examples:
   # Send bot message (automatic/system message)
   kommunicator-cli send-teams --to john --message "Automatic reminder" --bot
 
-  # Send Adaptive Card from JSON file
-  cat adaptivecard.json | kommunicator-cli send-teams --to john --format adaptivecard
+  # Send Adaptive Card from JSON file (auto-detected)
+  cat adaptivecard.json | kommunicator-cli send-teams --to john
 
-  # Send Adaptive Card with bot mode
+  # Send Adaptive Card to a channel
+  cat adaptivecard.json | kommunicator-cli send-teams --to "Canal_Dev"
+
+  # Send Adaptive Card with explicit format
   cat adaptivecard.json | kommunicator-cli send-teams --to john --format adaptivecard --bot
+
+Configuration:
+  - Users: conf/humans.conf for email-to-alias mappings
+  - Groups: conf/conversations.conf for conversation/channel name mappings
 
 Environment Variables:
   TEAMS_WEBHOOK_KOMMUNICATOR - Required Teams webhook URL
@@ -254,7 +267,7 @@ Environment Variables:
     send_teams_parser.add_argument(
         "--to",
         required=True,
-        help="Recipient email address or alias"
+        help="Recipient: email, user alias, conversation name, or channel name"
     )
 
     send_teams_parser.add_argument(

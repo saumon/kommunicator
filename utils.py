@@ -10,6 +10,9 @@ logger = get_logger(__name__)
 _humans_config = None
 _all_emails = None
 
+# Cache for conversations configuration
+_conversations_config = None
+
 
 def _extract_email_parts(email: str) -> list:
     """
@@ -186,6 +189,116 @@ def get_email_by_alias(alias: str) -> str:
     return email
 
 
+def _load_conversations_config():
+    """
+    Load and parse the conversations.conf file.
+
+    Returns:
+        dict: Dictionary mapping lowercase conversation names to their IDs
+              Format: {"name": {"type": "conversation|channel", "conversationId": "...", "teamId": "..." (optional)}}
+    """
+    global _conversations_config
+
+    if _conversations_config is not None:
+        return _conversations_config
+
+    config_file = Path(__file__).parent / "conf" / "conversations.conf"
+    _conversations_config = {}
+
+    if not config_file.exists():
+        logger.warning(f"Conversations config file not found: {config_file}")
+        return _conversations_config
+
+    try:
+        with open(config_file, 'r', encoding='utf-8') as f:
+            for line_number, line in enumerate(f, 1):
+                # Skip comments and empty lines
+                line = line.strip()
+                if not line or line.startswith('#'):
+                    continue
+
+                # Parse line: NAME=ID or NAME=CONVERSATION_ID|TEAM_ID
+                if '=' not in line:
+                    logger.warning(f"Invalid line {line_number} in conversations.conf: {line}")
+                    continue
+
+                name, ids = line.split('=', 1)
+                name = name.strip()
+                ids = ids.strip()
+
+                # Validate name
+                if not name:
+                    logger.warning(f"Invalid name on line {line_number}")
+                    continue
+
+                # Normalize name for lookup (lowercase, replace spaces with underscores)
+                normalized_name = name.replace(' ', '_').lower()
+
+                # Check if it's a channel (contains |) or conversation
+                if '|' in ids:
+                    # Channel format: conversationId|teamId
+                    parts = ids.split('|')
+                    if len(parts) == 2:
+                        conversation_id, team_id = parts
+                        _conversations_config[normalized_name] = {
+                            "type": "channel",
+                            "conversationId": conversation_id.strip(),
+                            "teamId": team_id.strip()
+                        }
+                        logger.debug(f"Loaded channel '{name}': conversationId={conversation_id.strip()}, teamId={team_id.strip()}")
+                    else:
+                        logger.warning(f"Invalid channel format on line {line_number}: {line}")
+                else:
+                    # Conversation format: conversationId only
+                    _conversations_config[normalized_name] = {
+                        "type": "conversation",
+                        "conversationId": ids
+                    }
+                    logger.debug(f"Loaded conversation '{name}': conversationId={ids}")
+
+        logger.info(f"Loaded {len(_conversations_config)} conversation/channel mappings from conversations.conf")
+
+    except Exception as e:
+        logger.error(f"Error loading conversations.conf: {e}", exc_info=True)
+
+    return _conversations_config
+
+
+def get_conversation_by_name(name: str) -> dict:
+    """
+    Get conversation/channel information by name.
+
+    Args:
+        name: Conversation or channel name (case-insensitive, spaces allowed)
+
+    Returns:
+        dict: Dictionary with type, conversationId, and optionally teamId
+              Example: {"type": "conversation", "conversationId": "19:meeting_abc@thread.skype"}
+              Example: {"type": "channel", "conversationId": "19:...", "teamId": "19:..."}
+
+    Raises:
+        ValueError: If conversation name is not found in the configuration
+    """
+    if not name or not name.strip():
+        raise ValueError("Conversation name cannot be empty")
+
+    # Load config if not already loaded
+    config = _load_conversations_config()
+
+    # Normalize name for lookup (lowercase, replace spaces with underscores)
+    normalized_name = name.strip().replace(' ', '_').lower()
+
+    # Look up the conversation
+    conversation = config.get(normalized_name)
+
+    if conversation is None:
+        logger.warning(f"Conversation not found: {name}")
+        raise ValueError(f"No conversation found for name: {name}")
+
+    logger.debug(f"Resolved conversation '{name}' to {conversation}")
+    return conversation
+
+
 def send_email_http(to: str, subject: str, body: str) -> None:
     """
     Send an email via Teams webhook.
@@ -259,16 +372,20 @@ def send_email_http(to: str, subject: str, body: str) -> None:
 
 def send_teams_message(to: str, message: str, bot: bool = False, format: str = "auto") -> None:
     """
-    Send a Teams message to a user via Teams webhook.
+    Send a Teams message to a user, conversation, or channel via Teams webhook.
 
     Args:
-        to: Recipient email address or alias
+        to: Recipient - can be:
+            - Email address (user@example.com)
+            - User alias from humans.conf (john, john doe)
+            - Conversation name from conversations.conf (Equipe_Dev, Support_Client)
+            - Channel name from conversations.conf (Canal_General)
         message: Message content (plain text for 'message' format, JSON string for 'adaptivecard' format)
         bot: Whether the message is from a bot (default: False)
         format: Message format - 'auto' (auto-detect), 'message' for plain text, or 'adaptivecard' for Adaptive Card (default: 'auto')
 
     Raises:
-        ValueError: If TEAMS_WEBHOOK_KOMMUNICATOR is not set, if alias is not found, or if format is invalid
+        ValueError: If TEAMS_WEBHOOK_KOMMUNICATOR is not set, if recipient is not found, or if format is invalid
         requests.RequestException: If there's an error sending the HTTP request
         Exception: For any other unexpected errors
     """
@@ -295,13 +412,32 @@ def send_teams_message(to: str, message: str, bot: bool = False, format: str = "
         if format not in ["message", "adaptivecard"]:
             raise ValueError(f"Invalid format '{format}'. Must be 'auto', 'message' or 'adaptivecard'")
 
-        # If 'to' is not an email address (doesn't contain @), treat it as an alias
-        if '@' not in to:
-            logger.info(f"'{to}' appears to be an alias, looking up email address")
-            to = get_email_by_alias(to)
-            logger.info(f"Resolved alias to email: {to}")
+        # Determine target type and resolve recipient
+        target = None
+        conversation_info = None
+        
+        # Try to resolve as conversation/channel first
+        try:
+            conversation_info = get_conversation_by_name(to)
+            if conversation_info["type"] == "channel":
+                target = "teams-canal"
+                logger.info(f"Resolved '{to}' as Teams channel")
+            else:
+                target = "teams-conversation"
+                logger.info(f"Resolved '{to}' as Teams conversation")
+        except ValueError:
+            # Not a conversation/channel, try as user email/alias
+            if '@' not in to:
+                try:
+                    logger.info(f"'{to}' appears to be an alias, looking up email address")
+                    to = get_email_by_alias(to)
+                    logger.info(f"Resolved alias to email: {to}")
+                except ValueError:
+                    raise ValueError(f"'{to}' not found in conversations.conf or humans.conf")
+            target = "teams-message"
+            logger.info(f"Targeting user: {to}")
 
-        logger.info(f"Attempting to send Teams {format} to {to}")
+        logger.info(f"Attempting to send Teams {format} (target: {target})")
 
         # Get webhook URL from environment variable
         webhook_url = os.getenv("TEAMS_WEBHOOK_KOMMUNICATOR")
@@ -314,7 +450,7 @@ def send_teams_message(to: str, message: str, bot: bool = False, format: str = "
             logger.error(error_msg)
             raise ValueError(error_msg)
 
-        # Prepare JSON payload based on format
+        # Prepare JSON payload based on format and target
         if format == "adaptivecard":
             # Parse the JSON content for adaptive card
             try:
@@ -323,29 +459,81 @@ def send_teams_message(to: str, message: str, bot: bool = False, format: str = "
                 logger.error(f"Invalid JSON for adaptive card: {str(e)}")
                 raise ValueError(f"Invalid JSON for adaptive card: {str(e)}")
 
-            payload = {
-                "target": "teams-message",
-                "format": "adaptivecard",
-                "userEmail": to,
-                "bot": str(bot).lower(),
-                "attachments": [
-                    {
-                        "contentType": "application/vnd.microsoft.card.adaptive",
-                        "content": adaptive_card_content
-                    }
-                ]
-            }
+            if target == "teams-message":
+                # User message with adaptive card
+                payload = {
+                    "target": target,
+                    "format": "adaptivecard",
+                    "userEmail": to,
+                    "bot": str(bot).lower(),
+                    "attachments": [
+                        {
+                            "contentType": "application/vnd.microsoft.card.adaptive",
+                            "content": adaptive_card_content
+                        }
+                    ]
+                }
+            elif target == "teams-canal":
+                # Channel message with adaptive card
+                payload = {
+                    "target": target,
+                    "format": "adaptivecard",
+                    "conversationId": conversation_info["conversationId"],
+                    "teamId": conversation_info["teamId"],
+                    "bot": str(bot).lower(),
+                    "attachments": [
+                        {
+                            "contentType": "application/vnd.microsoft.card.adaptive",
+                            "content": adaptive_card_content
+                        }
+                    ]
+                }
+            else:
+                # Conversation message with adaptive card
+                payload = {
+                    "target": target,
+                    "format": "adaptivecard",
+                    "conversationId": conversation_info["conversationId"],
+                    "bot": str(bot).lower(),
+                    "attachments": [
+                        {
+                            "contentType": "application/vnd.microsoft.card.adaptive",
+                            "content": adaptive_card_content
+                        }
+                    ]
+                }
         else:
             # Format message: replace newlines with <br>
             message_formatted = message.replace("\n", "<br>")
 
-            payload = {
-                "target": "teams-message",
-                "format": "message",
-                "userEmail": to,
-                "message": message_formatted,
-                "bot": str(bot).lower()
-            }
+            if target == "teams-message":
+                # User message
+                payload = {
+                    "target": target,
+                    "format": "message",
+                    "userEmail": to,
+                    "message": message_formatted,
+                    "bot": str(bot).lower()
+                }
+            elif target == "teams-canal":
+                # Channel message
+                payload = {
+                    "target": target,
+                    "format": "message",
+                    "conversationId": conversation_info["conversationId"],
+                    "teamId": conversation_info["teamId"],
+                    "message": message_formatted,
+                    "bot": str(bot).lower()
+                }
+            else:
+                # Conversation message
+                payload = {
+                    "target": target,
+                    "format": "message",
+                    "conversationId": conversation_info["conversationId"],
+                    "message": message_formatted,
+                    "bot": str(bot).lower()
+                }
 
         # Send POST request to webhook
         logger.debug(f"Sending POST request to webhook with payload: {json.dumps(payload, indent=2)}")
@@ -360,7 +548,12 @@ def send_teams_message(to: str, message: str, bot: bool = False, format: str = "
 
         logger.debug(f"Received response: {response.status_code} - {response.text}")
 
-        logger.info(f"Teams {format} sent successfully to {to}")
+        if target == "teams-message":
+            logger.info(f"Teams {format} sent successfully to user {to}")
+        elif target == "teams-canal":
+            logger.info(f"Teams {format} sent successfully to channel")
+        else:
+            logger.info(f"Teams {format} sent successfully to conversation")
 
     except ValueError as e:
         logger.error(f"Configuration error: {str(e)}")
