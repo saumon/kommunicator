@@ -78,6 +78,8 @@ def cmd_get_email(args):
 
 def cmd_send_teams(args):
     """Handle the send-teams command."""
+    from pathlib import Path
+    
     # Get message from argument or stdin
     message = args.message
     if message is None:
@@ -93,28 +95,96 @@ def cmd_send_teams(args):
         print("Error: Message cannot be empty", file=sys.stderr)
         return 1
 
-    try:
-        if args.verbose:
-            print(f"Sending Teams {args.format} to: {args.to}")
-            print(f"Bot mode: {args.bot}")
-            print(f"Message length: {len(message)} characters")
+    # Check if --to is a file path (mass sending mode)
+    to_path = Path(args.to)
+    if to_path.exists() and to_path.is_file():
+        # Mass sending mode: read recipients from file
+        logger.info(f"CLI: Mass sending mode detected - reading recipients from {args.to}")
+        
+        try:
+            recipients = []
+            with open(to_path, 'r', encoding='utf-8') as f:
+                for line_number, line in enumerate(f, 1):
+                    # Skip comments and empty lines
+                    line = line.strip()
+                    if not line or line.startswith('#'):
+                        continue
+                    recipients.append(line)
+            
+            if not recipients:
+                print(f"✗ No recipients found in {args.to}", file=sys.stderr)
+                logger.error(f"CLI: No recipients found in {args.to}")
+                return 1
+            
+            if args.verbose:
+                print(f"Found {len(recipients)} recipient(s) in {args.to}")
+                print(f"Sending Teams {args.format}")
+                print(f"Bot mode: {args.bot}")
+                print(f"Message length: {len(message)} characters")
+            
+            logger.info(f"CLI: Mass sending to {len(recipients)} recipients")
+            
+            # Send to each recipient
+            success_count = 0
+            failed_recipients = []
+            
+            for recipient in recipients:
+                try:
+                    if args.verbose:
+                        print(f"  → Sending to: {recipient}")
+                    
+                    logger.info(f"CLI: Sending Teams {args.format} to {recipient} (bot={args.bot})")
+                    send_teams_message(recipient, message, args.bot, args.format)
+                    
+                    print(f"  ✓ Sent successfully to {recipient}")
+                    logger.info(f"CLI: Teams {args.format} sent successfully to {recipient}")
+                    success_count += 1
+                    
+                except Exception as e:
+                    print(f"  ✗ Failed to send to {recipient}: {e}", file=sys.stderr)
+                    logger.error(f"CLI: Error sending to {recipient}: {e}", exc_info=True)
+                    failed_recipients.append((recipient, str(e)))
+            
+            # Summary
+            print(f"\n📊 Summary: {success_count}/{len(recipients)} messages sent successfully")
+            if failed_recipients:
+                print(f"❌ Failed recipients ({len(failed_recipients)}):")
+                for recipient, error in failed_recipients:
+                    print(f"  - {recipient}: {error}")
+                return 1
+            
+            logger.info(f"CLI: Mass sending completed - {success_count}/{len(recipients)} successful")
+            return 0
+            
+        except Exception as e:
+            print(f"✗ Error reading recipients file: {e}", file=sys.stderr)
+            logger.error(f"CLI: Error reading recipients file {args.to}: {e}", exc_info=True)
+            return 1
+    
+    else:
+        # Single recipient mode
+        try:
+            if args.verbose:
+                print(f"Sending Teams {args.format} to: {args.to}")
+                print(f"Bot mode: {args.bot}")
+                print(f"Message length: {len(message)} characters")
 
-        logger.info(f"CLI: Sending Teams {args.format} to {args.to} (bot={args.bot})")
-        send_teams_message(args.to, message, args.bot, args.format)
+            logger.info(f"CLI: Sending Teams {args.format} to {args.to} (bot={args.bot})")
+            send_teams_message(args.to, message, args.bot, args.format)
 
-        print(f"✓ Teams {args.format} sent successfully to {args.to}")
-        logger.info(f"CLI: Teams {args.format} sent successfully to {args.to}")
-        return 0
+            print(f"✓ Teams {args.format} sent successfully to {args.to}")
+            logger.info(f"CLI: Teams {args.format} sent successfully to {args.to}")
+            return 0
 
-    except ValueError as e:
-        print(f"✗ Configuration error: {e}", file=sys.stderr)
-        logger.error(f"CLI: Configuration error: {e}")
-        return 1
+        except ValueError as e:
+            print(f"✗ Configuration error: {e}", file=sys.stderr)
+            logger.error(f"CLI: Configuration error: {e}")
+            return 1
 
-    except Exception as e:
-        print(f"✗ Error sending Teams message: {e}", file=sys.stderr)
-        logger.error(f"CLI: Error sending Teams message: {e}", exc_info=True)
-        return 1
+        except Exception as e:
+            print(f"✗ Error sending Teams message: {e}", file=sys.stderr)
+            logger.error(f"CLI: Error sending Teams message: {e}", exc_info=True)
+            return 1
 
 
 def main():
@@ -255,6 +325,34 @@ Examples:
   # Send Adaptive Card with explicit format
   cat adaptivecard.json | kommunicator-cli send-teams --to john --format adaptivecard --bot
 
+  # MASS SENDING: Send to multiple recipients from a file
+  kommunicator-cli send-teams --to recipients.conf --message "Hello everyone"
+  
+  # Mass sending with Adaptive Card
+  cat adaptivecard.json | kommunicator-cli send-teams --to recipients.conf
+
+  # Mass sending with verbose output
+  kommunicator-cli -v send-teams --to recipients.conf --message "Notification" --bot
+
+Mass Sending:
+  When --to points to an existing file, the command enters mass sending mode.
+  The file should contain one recipient per line (email, alias, conversation, or channel name).
+  Lines starting with # are treated as comments and ignored.
+  Empty lines are also ignored.
+  
+  Example recipients.conf:
+    # User emails and aliases
+    john.doe@example.com
+    alice
+    bob
+    
+    # Conversations and channels
+    Equipe_Dev
+    Canal_General
+    
+    # This is a comment and will be skipped
+    # jane@example.com
+
 Configuration:
   - Users: conf/humans.conf for email-to-alias mappings
   - Groups: conf/conversations.conf for conversation/channel name mappings
@@ -267,7 +365,7 @@ Environment Variables:
     send_teams_parser.add_argument(
         "--to",
         required=True,
-        help="Recipient: email, user alias, conversation name, or channel name"
+        help="Recipient: email, user alias, conversation/channel name, or path to recipients file for mass sending"
     )
 
     send_teams_parser.add_argument(
