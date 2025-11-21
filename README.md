@@ -192,7 +192,10 @@ The CLI allows you to send emails directly from the command line without running
 
 **Send-email command options:**
 
-- `--to` (required): Recipient email address or alias
+- `--to` (required): Recipient - can be:
+  - Email address (`user@example.com`)
+  - User alias from `humans.conf` (`john`, `john doe`)
+  - **Path to a recipients file** for mass sending (see Mass Sending section below)
 - `--subject` (required): Email subject
 - `--body` (optional): Email body content. If not provided, reads from stdin
 
@@ -308,24 +311,25 @@ uv run kommunicator-cli.py get-email --alias "john"
 
 #### Mass Sending
 
-The `send-teams` command supports sending messages to multiple recipients in a single operation. When the `--to` parameter points to an existing file, the command enters **mass sending mode**.
+Both `send-email` and `send-teams` commands support sending messages to multiple recipients in a single operation. When the `--to` parameter points to an existing file, the command enters **mass sending mode**.
 
 **Recipient file format:**
 
-- One recipient per line (email address, alias, conversation name, or channel name)
+- One recipient per line
+  - For `send-email`: email addresses or user aliases
+  - For `send-teams`: email addresses, user aliases, conversation names, or channel names
 - Lines starting with `#` are treated as comments and ignored
 - Empty lines are ignored
-- Supports all recipient types: emails, user aliases, conversation names, and channel names
 
 **Example recipient file** (`conf/mass-target.conf`):
 
 ```text
-# Users
+# Users (emails and aliases)
 john.doe@example.com
 alice
 bobby
 
-# Conversations and channels
+# For send-teams: also supports conversations and channels
 Equipe_Dev
 Canal_General
 
@@ -333,7 +337,51 @@ Canal_General
 # jane@example.com
 ```
 
-**Mass sending examples:**
+##### Mass Sending with send-email
+
+**Examples:**
+
+```bash
+# Send email to multiple recipients from a file
+./kommunicator-cli.py send-email --to conf/mass-target.conf --subject "Notice" --body "Important update"
+
+# Mass sending with body from stdin
+cat message.txt | ./kommunicator-cli.py send-email --to recipients.conf --subject "Report"
+
+# Mass sending with verbose output
+./kommunicator-cli.py -v send-email --to recipients.conf --subject "Alert" --body "Urgent message"
+
+# Using with uv
+uv run kommunicator-cli.py send-email --to conf/mass-target.conf --subject "Announcement" --body "News"
+```
+
+**Behavior:**
+
+- Reads all recipients from the file
+- Sends the email to each recipient individually (same subject and body for all)
+- Continues sending even if some recipients fail
+- Provides a summary with success and failure counts at the end
+- Returns exit code 0 if all succeeded, or 1 if any failed
+- Each recipient is resolved independently (supports email addresses and aliases)
+
+**Example output:**
+
+```text
+  → Sending to: john.doe@example.com
+  ✓ Sent successfully to john.doe@example.com
+  → Sending to: alice
+  ✓ Sent successfully to alice
+  → Sending to: bob
+  ✗ Failed to send to bob: Alias 'bob' not found
+
+📊 Summary: 2/3 emails sent successfully
+❌ Failed recipients (1):
+  - bob: Alias 'bob' not found
+```
+
+##### Mass Sending with send-teams
+
+**Examples:**
 
 ```bash
 # Send a message to multiple recipients from a file
@@ -352,9 +400,9 @@ cat messages/adaptivecard.json.sample | ./kommunicator-cli.py send-teams --to re
 uv run kommunicator-cli.py send-teams --to conf/mass-target.conf --message "Announcement"
 ```
 
-**Mass sending behavior:**
+**Behavior:**
 
-- The command reads all recipients from the file
+- Reads all recipients from the file
 - Sends the message to each recipient individually
 - Continues sending even if some recipients fail
 - Provides a summary with success and failure counts at the end
@@ -371,6 +419,16 @@ Error sending to bob: Alias 'bob' not found
 Successfully sent to: Canal_General (channel)
 
 Mass sending complete: 4 succeeded, 1 failed
+  → Sending to: john.doe@example.com
+  ✓ Sent successfully to john.doe@example.com
+  → Sending to: Equipe_Dev
+  ✓ Sent successfully to Equipe_Dev
+  → Sending to: bob
+  ✗ Failed to send to bob: Alias 'bob' not found
+
+📊 Summary: 2/3 messages sent successfully
+❌ Failed recipients (1):
+  - bob: Alias 'bob' not found
 ```
 
 **Note:** An example configuration file is provided at `conf/mass-target.conf.example`. Copy it to create your own recipient list.
