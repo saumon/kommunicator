@@ -203,6 +203,7 @@ The CLI allows you to send emails directly from the command line without running
   - User alias from `humans.conf` (`john`, `john doe`)
   - Conversation name from `conversations.conf` (`Equipe_Dev`, `Support_Client`)
   - Channel name from `conversations.conf` (`Canal_General`)
+  - **Path to a recipients file** for mass sending (see Mass Sending section below)
 - `--message` (optional): Message content. If not provided, reads from stdin
 - `--format` (optional): Message format - `auto` (auto-detect, default), `message` for plain text, or `adaptivecard` for Adaptive Card
 - `--bot` (optional): Mark the message as coming from a bot (automatic/system message)
@@ -304,6 +305,75 @@ uv run kommunicator-cli.py get-email --alias "john"
 ./kommunicator-cli.py send-teams --help
 ./kommunicator-cli.py get-email --help
 ```
+
+#### Mass Sending
+
+The `send-teams` command supports sending messages to multiple recipients in a single operation. When the `--to` parameter points to an existing file, the command enters **mass sending mode**.
+
+**Recipient file format:**
+
+- One recipient per line (email address, alias, conversation name, or channel name)
+- Lines starting with `#` are treated as comments and ignored
+- Empty lines are ignored
+- Supports all recipient types: emails, user aliases, conversation names, and channel names
+
+**Example recipient file** (`conf/mass-target.conf`):
+
+```text
+# Users
+john.doe@example.com
+alice
+bobby
+
+# Conversations and channels
+Equipe_Dev
+Canal_General
+
+# This is a comment - will be skipped
+# jane@example.com
+```
+
+**Mass sending examples:**
+
+```bash
+# Send a message to multiple recipients from a file
+./kommunicator-cli.py send-teams --to conf/mass-target.conf --message "Hello everyone"
+
+# Send an Adaptive Card to multiple recipients
+cat messages/adaptivecard.json.sample | ./kommunicator-cli.py send-teams --to recipients.conf
+
+# Send a bot message to multiple recipients
+./kommunicator-cli.py send-teams --to recipients.conf --message "System notification" --bot
+
+# Mass sending with verbose output
+./kommunicator-cli.py -v send-teams --to recipients.conf --message "Alert"
+
+# Using with uv
+uv run kommunicator-cli.py send-teams --to conf/mass-target.conf --message "Announcement"
+```
+
+**Mass sending behavior:**
+
+- The command reads all recipients from the file
+- Sends the message to each recipient individually
+- Continues sending even if some recipients fail
+- Provides a summary with success and failure counts at the end
+- Returns exit code 0 if all succeeded, or 1 if any failed
+- Each recipient is resolved independently (users, conversations, channels)
+
+**Example output:**
+
+```text
+Successfully sent to: john.doe@example.com
+Successfully sent to: alice (alice.wonder@example.com)
+Successfully sent to: Equipe_Dev (conversation)
+Error sending to bob: Alias 'bob' not found
+Successfully sent to: Canal_General (channel)
+
+Mass sending complete: 4 succeeded, 1 failed
+```
+
+**Note:** An example configuration file is provided at `conf/mass-target.conf.example`. Copy it to create your own recipient list.
 
 **Note:** The CLI requires the same `TEAMS_WEBHOOK_KOMMUNICATOR` environment variable as the MCP server. The `get-email` command uses the `conf/humans.conf` configuration file.
 
@@ -525,10 +595,11 @@ kommunicator/
 ├── utils.py               # Email sending and alias utilities
 ├── logging_config.py      # Logging configuration
 ├── conf/
-│   ├── humans.conf                  # Email-to-alias mappings (user-configured)
-│   ├── humans.conf.example          # Example configuration file
-│   ├── conversations.conf           # Conversation/channel mappings (user-configured)
-│   └── conversations.conf.example   # Example configuration file
+│   ├── humans.conf                      # Email-to-alias mappings (user-configured)
+│   ├── humans.conf.example              # Example configuration file
+│   ├── conversations.conf               # Conversation/channel mappings (user-configured)
+│   ├── conversations.conf.example       # Example configuration file
+│   └── mass-target.conf.example         # Example mass sending recipient list
 ├── messages/              # Sample message templates
 │   ├── message.txt.sample           # Plain text message example
 │   └── adaptivecard.json.sample     # Adaptive Card JSON example

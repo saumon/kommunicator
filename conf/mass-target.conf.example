@@ -1,0 +1,34 @@
+# Mass Target Emails Configuration
+# This file is used with the send-teams and send-email commands for mass sending
+# Format: One recipient per line
+# Lines starting with # are comments and will be ignored
+# Empty lines are also ignored
+
+# Email addresses
+john.doe@example.com
+alice.wonder@example.com
+bob.wilson@example.com
+
+# User aliases from humans.conf
+john
+alice
+bobby
+
+# Conversation names from conversations.conf (for send-teams only)
+Equipe_Dev
+Support_Client
+
+# Channel names from conversations.conf (for send-teams only)
+Canal_General
+Canal_Dev
+
+# Mixed recipients (emails, aliases, conversations, channels)
+# toto.smith@example.com
+# momo
+# Equipe_Marketing
+
+# You can also use multi-word aliases (use quotes in the CLI if needed)
+# john doe
+
+# This is a comment line and will be skipped
+# jane@example.com
