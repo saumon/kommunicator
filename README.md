@@ -280,6 +280,76 @@ cat messages/adaptivecard.json.sample | ./kommunicator-cli.py send-teams --to us
 # Send plain text message from file
 cat messages/message.txt.sample | ./kommunicator-cli.py send-teams --to john
 
+# Send multi-line message using heredoc
+./kommunicator-cli.py send-teams --to john <<EOF
+Hello John,
+
+This is a multi-line message.
+It supports multiple paragraphs.
+
+Best regards
+EOF
+
+# Send multi-line email using heredoc
+./kommunicator-cli.py send-email --to john --subject "Multi-line message" <<EOF
+Hello John,
+
+This is a multi-line email body.
+You can write as many lines as you need.
+
+Best regards,
+Your Team
+EOF
+
+# Create and send an Adaptive Card using heredoc
+./kommunicator-cli.py send-teams --to "Canal_General" <<'EOF'
+{
+  "type": "AdaptiveCard",
+  "version": "1.4",
+  "body": [
+    {
+      "type": "TextBlock",
+      "text": "Important Announcement",
+      "weight": "Bolder",
+      "size": "Large"
+    },
+    {
+      "type": "TextBlock",
+      "text": "This is an announcement sent via heredoc",
+      "wrap": true
+    },
+    {
+      "type": "FactSet",
+      "facts": [
+        {
+          "title": "Date:",
+          "value": "December 1, 2025"
+        },
+        {
+          "title": "Status:",
+          "value": "Active"
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "type": "Action.OpenUrl",
+      "title": "Learn More",
+      "url": "https://example.com"
+    }
+  ]
+}
+EOF
+
+# Send bot message using heredoc
+./kommunicator-cli.py send-teams --to john --bot <<EOF
+🤖 Automatic System Notification
+
+Your daily report is ready.
+Please review it at your earliest convenience.
+EOF
+
 # Look up email by alias
 ./kommunicator-cli.py get-email --alias "john"
 
