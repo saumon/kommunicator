@@ -1,6 +1,15 @@
+<div align="center">
+  <img src="docs/assets/logo.png" alt="Kommunicator Logo" width="200">
+
 # Kommunicator™
 
-A lightweight CLI and MCP server for sending emails and Microsoft Teams messages via webhooks.
+  **A lightweight CLI and MCP server for sending emails and Microsoft Teams messages via webhooks.**
+
+  [![Python](https://img.shields.io/badge/Python-3.14+-3776AB?style=flat-square&logo=python&logoColor=white)](https://www.python.org/) [![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE) [![MCP](https://img.shields.io/badge/MCP-Compatible-8B5CF6?style=flat-square)](https://modelcontextprotocol.io/) [![Microsoft Teams](https://img.shields.io/badge/Microsoft%20Teams-Webhooks-6264A7?style=flat-square&logo=microsoftteams&logoColor=white)](https://www.microsoft.com/en-us/microsoft-teams/) [![FastMCP](https://img.shields.io/badge/Built%20with-FastMCP-FF6B6B?style=flat-square)](https://github.com/jlowin/fastmcp) [![Open Source](https://img.shields.io/badge/Open%20Source-❤️-red?style=flat-square)]() [![Website](https://img.shields.io/badge/Website-Landing%20Page-00D4AA?style=flat-square&logo=github-pages&logoColor=white)](https://saumon.github.io/kommunicator/)
+
+</div>
+
+---
 
 ## Table of contents
 
