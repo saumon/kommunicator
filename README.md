@@ -1,10 +1,51 @@
-# Kommunicator
+# Kommunicator™
 
-A simple MCP (Model Context Protocol) server built with FastMCP.
+A lightweight CLI and MCP server for sending emails and Microsoft Teams messages via webhooks.
+
+## Table of contents
+
+- [Kommunicator™](#kommunicator)
+  - [Table of contents](#table-of-contents)
+  - [Description](#description)
+  - [Features](#features)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+  - [Configuration](#configuration)
+    - [Environment Variables](#environment-variables)
+    - [Human Aliases Configuration](#human-aliases-configuration)
+    - [Conversations and Channels Configuration](#conversations-and-channels-configuration)
+  - [Usage](#usage)
+    - [Command-Line Interface (CLI)](#command-line-interface-cli)
+      - [Mass Sending](#mass-sending)
+        - [Mass Sending with send-email](#mass-sending-with-send-email)
+        - [Mass Sending with send-teams](#mass-sending-with-send-teams)
+    - [Running the MCP Server](#running-the-mcp-server)
+    - [Development Mode](#development-mode)
+    - [Configuration with Claude Desktop](#configuration-with-claude-desktop)
+  - [Available Tools](#available-tools)
+    - [`get_status`](#get_status)
+    - [`send_email`](#send_email)
+    - [`send_teams`](#send_teams)
+  - [Development](#development)
+    - [Project Structure](#project-structure)
+    - [Logging](#logging)
+    - [Adding New Tools](#adding-new-tools)
+    - [Testing Alias Resolution](#testing-alias-resolution)
+  - [License](#license)
+  - [Contributing](#contributing)
 
 ## Description
 
-Kommunicator is an MCP server that provides email and Teams messaging capabilities through Microsoft Teams webhooks. It exposes tools for checking server status, sending emails, and sending Teams messages to users, conversations, and channels, and includes a command-line interface for standalone usage.
+Kommunicator™ is both:
+
+- a **command-line interface (CLI)** for sending emails and Teams messages from your terminal, and
+- an **MCP server** exposing the same capabilities to MCP-compatible clients.
+
+The MCP server is implemented in **Python** and built on top of the **FastMCP** framework.
+
+Kommunicator™ is designed for employees in Office 365-enabled organizations and is intended to be used with an automation flow in **Microsoft Power Automate**. It allows employees to send emails and messages without needing special privileges (no admin rights required). The main prerequisite is access to Power Automate, which is typically available in Office 365 enterprise environments.
+
+It sends emails and Teams messages via Microsoft Teams webhooks, supports human-friendly aliases, and can target users, conversations, and channels.
 
 ## Features
 
@@ -783,7 +824,9 @@ The test script will validate that aliases are correctly resolved to email addre
 
 ## License
 
-To be determined
+Copyright (c) 2025 saumon
+
+This project is licensed under the MIT License. See the [LICENCE](LICENCE) file for details.
 
 ## Contributing
 
