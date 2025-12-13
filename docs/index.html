@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kommunicator™ - CLI & MCP Server for Teams and Email</title>
+    <meta name="description"
+        content="A lightweight CLI and MCP server for sending emails and Microsoft Teams messages via webhooks. Open source and ready for collaboration.">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/png" href="assets/favicon.png">
+</head>
+
+<body>
+    <!-- Animated background -->
+    <div class="bg-animation">
+        <div class="grid-overlay"></div>
+        <div class="glow glow-1"></div>
+        <div class="glow glow-2"></div>
+        <div class="glow glow-3"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#" class="logo">
+                <img src="assets/logo.png" alt="Kommunicator" class="logo-img">
+                <span class="logo-text">Kommunicator™</span>
+            </a>
+            <div class="nav-links">
+                <a href="#features">Features</a>
+                <a href="#usage">Usage</a>
+                <a href="#installation">Install</a>
+                <a href="https://github.com/saumon/kommunicator" target="_blank" class="btn btn-outline">
+                    <svg class="github-icon" viewBox="0 0 24 24" width="20" height="20">
+                        <path fill="currentColor"
+                            d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+                    </svg>
+                    GitHub
+                </a>
+            </div>
+            <button class="mobile-menu-btn" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu">
+        <a href="#features">Features</a>
+        <a href="#usage">Usage</a>
+        <a href="#installation">Install</a>
+        <a href="https://github.com/saumon/kommunicator" target="_blank">GitHub</a>
+    </div>
+
+    <!-- Hero Section -->
+    <header class="hero">
+        <div class="hero-content">
+            <div class="badge animate-fade-in">
+                <span class="badge-dot"></span>
+                Open Source Project
+            </div>
+            <h1 class="hero-title animate-fade-in-up">
+                <span class="gradient-text">Kommunicator™</span>
+            </h1>
+            <p class="hero-subtitle animate-fade-in-up delay-1">
+                A lightweight <span class="highlight">CLI</span> and <span class="highlight">MCP server</span> for
+                sending emails and Microsoft Teams messages via webhooks.
+            </p>
+            <div class="hero-actions animate-fade-in-up delay-2">
+                <a href="#installation" class="btn btn-primary">
+                    <span>Get Started</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7" />
+                    </svg>
+                </a>
+                <a href="https://github.com/saumon/kommunicator" target="_blank" class="btn btn-secondary">
+                    <svg class="github-icon" viewBox="0 0 24 24" width="20" height="20">
+                        <path fill="currentColor"
+                            d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+                    </svg>
+                    View on GitHub
+                </a>
+            </div>
+            <div class="hero-stats animate-fade-in-up delay-3">
+                <div class="stat">
+                    <span class="stat-icon">📧</span>
+                    <span class="stat-text">Email via Webhooks</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-icon">💬</span>
+                    <span class="stat-text">Teams Messages</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-icon">🤖</span>
+                    <span class="stat-text">MCP Compatible</span>
+                </div>
+            </div>
+        </div>
+        <div class="hero-visual animate-float">
+            <div class="terminal">
+                <div class="terminal-header">
+                    <div class="terminal-dots">
+                        <span class="dot red"></span>
+                        <span class="dot yellow"></span>
+                        <span class="dot green"></span>
+                    </div>
+                    <span class="terminal-title">kommunicator-cli</span>
+                </div>
+                <div class="terminal-body">
+                    <div class="terminal-line">
+                        <span class="prompt">$</span>
+                        <span class="command typing" id="typing-cmd"></span>
+                        <span class="cursor">|</span>
+                    </div>
+                    <div class="terminal-output" id="terminal-output"></div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge">Features</span>
+                <h2 class="section-title">Everything you need to <span class="gradient-text">communicate</span></h2>
+                <p class="section-subtitle">Powerful features for seamless messaging in your Office 365 environment</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card" data-aos="fade-up">
+                    <div class="feature-icon">📧</div>
+                    <h3>Send Emails</h3>
+                    <p>Send emails via Teams webhook with support for email addresses and human-friendly aliases.</p>
+                </div>
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="100">
+                    <div class="feature-icon">💬</div>
+                    <h3>Teams Messages</h3>
+                    <p>Send messages to users, conversations, and channels with automatic target detection.</p>
+                </div>
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="200">
+                    <div class="feature-icon">👥</div>
+                    <h3>Human Aliases</h3>
+                    <p>Use friendly names instead of email addresses. Automatic alias generation from email parts.</p>
+                </div>
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="300">
+                    <div class="feature-icon">🎯</div>
+                    <h3>Auto-Detection</h3>
+                    <p>Automatically detects target type - user, conversation, or channel - based on recipient.</p>
+                </div>
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="400">
+                    <div class="feature-icon">🚀</div>
+                    <h3>MCP Server</h3>
+                    <p>Built on FastMCP framework for seamless integration with MCP-compatible clients like Claude.</p>
+                </div>
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="500">
+                    <div class="feature-icon">📊</div>
+                    <h3>Mass Sending</h3>
+                    <p>Send messages to multiple recipients at once with detailed success/failure reporting.</p>
+                </div>
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="600">
+                    <div class="feature-icon">🎨</div>
+                    <h3>Adaptive Cards</h3>
+                    <p>Support for rich Adaptive Cards with auto-detection from JSON content.</p>
+                </div>
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="700">
+                    <div class="feature-icon">🔧</div>
+                    <h3>No Admin Rights</h3>
+                    <p>Works with standard Office 365 access via Power Automate webhooks.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Usage Section -->
+    <section id="usage" class="usage">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge">Usage</span>
+                <h2 class="section-title">Simple and <span class="gradient-text">intuitive</span> commands</h2>
+                <p class="section-subtitle">Get started in seconds with easy-to-remember commands</p>
+            </div>
+            <div class="usage-tabs">
+                <button class="tab-btn active" data-tab="cli">CLI Commands</button>
+                <button class="tab-btn" data-tab="mcp">MCP Server</button>
+            </div>
+            <div class="usage-content">
+                <div class="tab-panel active" id="cli">
+                    <div class="code-examples">
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-title">Send an email</span>
+                                <button class="copy-btn" data-code="send-email">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                        <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            <pre><code>./kommunicator-cli.py send-email \
+  --to john \
+  --subject "Meeting Reminder" \
+  --body "Don't forget our meeting at 2pm!"</code></pre>
+                        </div>
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-title">Send a Teams message</span>
+                                <button class="copy-btn" data-code="send-teams">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                        <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            <pre><code>./kommunicator-cli.py send-teams \
+  --to "Dev Team" \
+  --message "Deployment complete! 🚀"</code></pre>
+                        </div>
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-title">Mass sending</span>
+                                <button class="copy-btn" data-code="mass-send">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                        <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            <pre><code>./kommunicator-cli.py send-teams \
+  --to recipients.conf \
+  --message "Important announcement for everyone"</code></pre>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-panel" id="mcp">
+                    <div class="code-examples">
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-title">Start the MCP server</span>
+                                <button class="copy-btn" data-code="mcp-start">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                        <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            <pre><code>uv run kommunicator-mcp.py</code></pre>
+                        </div>
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-title">Development mode with Inspector</span>
+                                <button class="copy-btn" data-code="mcp-dev">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                        <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            <pre><code>uv run mcp dev kommunicator-mcp.py</code></pre>
+                        </div>
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-title">Claude Desktop configuration</span>
+                                <button class="copy-btn" data-code="claude-config">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                        <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            <pre><code>{
+  "mcpServers": {
+    "mcp-kommunicator": {
+      "command": "uv",
+      "args": ["--directory", "/path/to/kommunicator", "run", "kommunicator-mcp.py"],
+      "env": { "TEAMS_WEBHOOK_KOMMUNICATOR": "https://..." }
+    }
+  }
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Installation Section -->
+    <section id="installation" class="installation">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge">Installation</span>
+                <h2 class="section-title">Up and running in <span class="gradient-text">minutes</span></h2>
+                <p class="section-subtitle">Simple installation with uv package manager</p>
+            </div>
+            <div class="install-steps">
+                <div class="step" data-aos="fade-right">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h3>Clone the repository</h3>
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-title">Terminal</span>
+                                <button class="copy-btn">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                        <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            <pre><code>git clone https://github.com/saumon/kommunicator.git
+cd kommunicator</code></pre>
+                        </div>
+                    </div>
+                </div>
+                <div class="step" data-aos="fade-right" data-aos-delay="100">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h3>Install dependencies</h3>
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-title">Terminal</span>
+                                <button class="copy-btn">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                        <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            <pre><code>uv sync</code></pre>
+                        </div>
+                    </div>
+                </div>
+                <div class="step" data-aos="fade-right" data-aos-delay="200">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h3>Configure your webhook</h3>
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-title">Environment variable</span>
+                                <button class="copy-btn">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                        <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            <pre><code>export TEAMS_WEBHOOK_KOMMUNICATOR=\
+'https://your-webhook-url'</code></pre>
+                        </div>
+                    </div>
+                </div>
+                <div class="step" data-aos="fade-right" data-aos-delay="300">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h3>Start communicating!</h3>
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-title">Send your first message</span>
+                                <button class="copy-btn">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                        <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            <pre><code>./kommunicator-cli.py send-teams \
+  --to john \
+  --message "Hello! 👋"</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="prerequisites">
+                <h3>Prerequisites</h3>
+                <div class="prereq-list">
+                    <div class="prereq-item">
+                        <span class="prereq-icon">🐍</span>
+                        <span>Python >= 3.14</span>
+                    </div>
+                    <div class="prereq-item">
+                        <span class="prereq-icon">📦</span>
+                        <span>uv (Python package manager)</span>
+                    </div>
+                    <div class="prereq-item">
+                        <span class="prereq-icon">☁️</span>
+                        <span>Office 365 with Power Automate access</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Open Source Section -->
+    <section class="opensource">
+        <div class="container">
+            <div class="opensource-content">
+                <div class="opensource-text">
+                    <span class="section-badge">Open Source</span>
+                    <h2>Built with <span class="heart">❤️</span> for the community</h2>
+                    <p>Kommunicator™ is completely open source and released under the MIT License. We believe in the
+                        power of collaboration and welcome contributions from developers around the world.</p>
+                    <div class="contribution-ways">
+                        <div class="contribution-item">
+                            <span class="contrib-icon">🐛</span>
+                            <span>Report bugs</span>
+                        </div>
+                        <div class="contribution-item">
+                            <span class="contrib-icon">💡</span>
+                            <span>Suggest features</span>
+                        </div>
+                        <div class="contribution-item">
+                            <span class="contrib-icon">🔧</span>
+                            <span>Submit pull requests</span>
+                        </div>
+                        <div class="contribution-item">
+                            <span class="contrib-icon">📖</span>
+                            <span>Improve documentation</span>
+                        </div>
+                    </div>
+                    <a href="https://github.com/saumon/kommunicator" target="_blank" class="btn btn-primary btn-lg">
+                        <svg class="github-icon" viewBox="0 0 24 24" width="24" height="24">
+                            <path fill="currentColor"
+                                d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+                        </svg>
+                        Contribute on GitHub
+                    </a>
+                </div>
+                <div class="opensource-visual">
+                    <div class="collab-animation">
+                        <div class="collab-circle"></div>
+                        <div class="collab-icons">
+                            <span class="collab-icon" style="--delay: 0s;">👩‍💻</span>
+                            <span class="collab-icon" style="--delay: 0.5s;">👨‍💻</span>
+                            <span class="collab-icon" style="--delay: 1s;">🧑‍💻</span>
+                            <span class="collab-icon" style="--delay: 1.5s;">👩‍💻</span>
+                            <span class="collab-icon" style="--delay: 2s;">👨‍💻</span>
+                            <span class="collab-icon" style="--delay: 2.5s;">🧑‍💻</span>
+                        </div>
+                        <div class="center-logo">
+                            <img src="assets/logo.png" alt="Kommunicator" class="center-logo-img">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <img src="assets/logo.png" alt="Kommunicator" class="logo-img">
+                    <span class="logo-text">Kommunicator™</span>
+                </div>
+                <div class="footer-links">
+                    <a href="https://github.com/saumon/kommunicator" target="_blank">GitHub</a>
+                    <a href="https://github.com/saumon/kommunicator/blob/main/README.md"
+                        target="_blank">Documentation</a>
+                    <a href="https://github.com/saumon/kommunicator/blob/main/LICENCE" target="_blank">License</a>
+                </div>
+                <p class="footer-copy">Released under the MIT License. Open source forever.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
