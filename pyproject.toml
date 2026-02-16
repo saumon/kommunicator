@@ -8,3 +8,9 @@ dependencies = [
     "mcp[cli]>=1.21.0",
     "requests>=2.31.0",
 ]
+
+[project.scripts]
+kommunicator-cli = "kommunicator_cli:main"
+
+[tool.setuptools]
+py-modules = ["kommunicator_cli", "kommunicator_mcp", "utils", "logging_config"]

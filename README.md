@@ -19,6 +19,11 @@
   - [Features](#features)
   - [Prerequisites](#prerequisites)
   - [Installation](#installation)
+    - [Clone the repository](#clone-the-repository)
+    - [Install as a global CLI tool](#install-as-a-global-cli-tool)
+    - [Update the tool](#update-the-tool)
+    - [Uninstall the tool](#uninstall-the-tool)
+    - [Alternative: Development only (without global installation)](#alternative-development-only-without-global-installation)
   - [Configuration](#configuration)
     - [Environment Variables](#environment-variables)
     - [Human Aliases Configuration](#human-aliases-configuration)
@@ -76,17 +81,60 @@ It sends emails and Teams messages via Microsoft Teams webhooks, supports human-
 
 ## Installation
 
-- Clone the repository:
+### Clone the repository
 
 ```bash
 git clone <repo-url>
 cd kommunicator
 ```
 
-- Install dependencies with uv:
+### Install as a global CLI tool
+
+Install the CLI as a global command available from anywhere:
+
+```bash
+uv tool install -e .
+```
+
+The `-e` (editable) flag allows code changes to be reflected immediately without reinstallation.
+
+**Note:** Make sure `~/.local/bin` is in your PATH. Add this to your shell profile (`~/.zshrc`, `~/.bashrc`) if needed:
+
+```bash
+export PATH="$HOME/.local/bin:$PATH"
+```
+
+After installation, verify it works:
+
+```bash
+kommunicator-cli --help
+```
+
+### Update the tool
+
+To update after pulling new changes:
+
+```bash
+cd /path/to/kommunicator
+git pull
+uv tool install -e . --force
+```
+
+The `--force` flag reinstalls even if already installed.
+
+### Uninstall the tool
+
+```bash
+uv tool uninstall kommunicator
+```
+
+### Alternative: Development only (without global installation)
+
+If you only want to run the CLI from the project directory:
 
 ```bash
 uv sync
+uv run kommunicator_cli.py --help
 ```
 
 ## Configuration
@@ -226,7 +274,7 @@ The CLI allows you to send emails directly from the command line without running
 **Basic usage:**
 
 ```bash
-./kommunicator-cli.py send-email --to user@example.com --subject "Meeting" --body "Meeting at 2pm"
+kommunicator-cli send-email --to user@example.com --subject "Meeting" --body "Meeting at 2pm"
 ```
 
 **Available commands:**
@@ -277,61 +325,61 @@ The CLI allows you to send emails directly from the command line without running
 
 ```bash
 # Simple email with email address
-./kommunicator-cli.py send-email --to user@example.com --subject "Hello" --body "Hello World!"
+kommunicator-cli send-email --to user@example.com --subject "Hello" --body "Hello World!"
 
 # Send email using an alias (no need for get-email!)
-./kommunicator-cli.py send-email --to john --subject "Hello" --body "Hello John!"
+kommunicator-cli send-email --to john --subject "Hello" --body "Hello John!"
 
 # Send email using multi-word alias
-./kommunicator-cli.py send-email --to "john doe" --subject "Meeting" --body "See you at 2pm"
+kommunicator-cli send-email --to "john doe" --subject "Meeting" --body "See you at 2pm"
 
 # Email with message from stdin
-echo "Meeting at 2pm" | ./kommunicator-cli.py send-email --to user@example.com --subject "Reminder"
+echo "Meeting at 2pm" | kommunicator-cli send-email --to user@example.com --subject "Reminder"
 
 # Email with message from file
-cat report.txt | ./kommunicator-cli.py send-email --to user@example.com --subject "Daily Report"
+cat report.txt | kommunicator-cli send-email --to user@example.com --subject "Daily Report"
 
 # Send a Teams message with email address
-./kommunicator-cli.py send-teams --to user@example.com --message "Hello World"
+kommunicator-cli send-teams --to user@example.com --message "Hello World"
 
 # Send Teams message using an alias
-./kommunicator-cli.py send-teams --to john --message "Meeting at 2pm"
+kommunicator-cli send-teams --to john --message "Meeting at 2pm"
 
 # Send Teams message using multi-word alias
-./kommunicator-cli.py send-teams --to "john doe" --message "Quick reminder"
+kommunicator-cli send-teams --to "john doe" --message "Quick reminder"
 
 # Send Teams message to a conversation/group
-./kommunicator-cli.py send-teams --to "Equipe_Dev" --message "Team meeting at 3pm"
+kommunicator-cli send-teams --to "Equipe_Dev" --message "Team meeting at 3pm"
 
 # Send Teams message to a channel
-./kommunicator-cli.py send-teams --to "Canal_General" --message "Important announcement"
+kommunicator-cli send-teams --to "Canal_General" --message "Important announcement"
 
 # Send Adaptive Card to a channel
-cat messages/adaptivecard.json.sample | ./kommunicator-cli.py send-teams --to "Canal_Dev"
+cat messages/adaptivecard.json.sample | kommunicator-cli send-teams --to "Canal_Dev"
 
 # Send Teams message from stdin
-echo "Hello World" | ./kommunicator-cli.py send-teams --to john
+echo "Hello World" | kommunicator-cli send-teams --to john
 
 # Send Teams message from file
-cat message.txt | ./kommunicator-cli.py send-teams --to user@example.com
+cat message.txt | kommunicator-cli send-teams --to user@example.com
 
 # Send bot message (automatic/system message)
-./kommunicator-cli.py send-teams --to john --message "Automatic reminder" --bot
+kommunicator-cli send-teams --to john --message "Automatic reminder" --bot
 
 # Send Adaptive Card (auto-detected from JSON content)
-cat messages/adaptivecard.json.sample | ./kommunicator-cli.py send-teams --to john
+cat messages/adaptivecard.json.sample | kommunicator-cli send-teams --to john
 
 # Send Adaptive Card with explicit format
-cat messages/adaptivecard.json.sample | ./kommunicator-cli.py send-teams --to john --format adaptivecard
+cat messages/adaptivecard.json.sample | kommunicator-cli send-teams --to john --format adaptivecard
 
 # Send Adaptive Card with bot mode
-cat messages/adaptivecard.json.sample | ./kommunicator-cli.py send-teams --to user@example.com --bot
+cat messages/adaptivecard.json.sample | kommunicator-cli send-teams --to user@example.com --bot
 
 # Send plain text message from file
-cat messages/message.txt.sample | ./kommunicator-cli.py send-teams --to john
+cat messages/message.txt.sample | kommunicator-cli send-teams --to john
 
 # Send multi-line message using heredoc
-./kommunicator-cli.py send-teams --to john <<EOF
+kommunicator-cli send-teams --to john <<EOF
 Hello John,
 
 This is a multi-line message.
@@ -341,7 +389,7 @@ Best regards
 EOF
 
 # Send multi-line email using heredoc
-./kommunicator-cli.py send-email --to john --subject "Multi-line message" <<EOF
+kommunicator-cli send-email --to john --subject "Multi-line message" <<EOF
 Hello John,
 
 This is a multi-line email body.
@@ -352,7 +400,7 @@ Your Team
 EOF
 
 # Create and send an Adaptive Card using heredoc
-./kommunicator-cli.py send-teams --to "Canal_General" <<'EOF'
+kommunicator-cli send-teams --to "Canal_General" <<'EOF'
 {
   "type": "AdaptiveCard",
   "version": "1.4",
@@ -393,7 +441,7 @@ EOF
 EOF
 
 # Send bot message using heredoc
-./kommunicator-cli.py send-teams --to john --bot <<EOF
+kommunicator-cli send-teams --to john --bot <<EOF
 🤖 Automatic System Notification
 
 Your daily report is ready.
@@ -401,32 +449,32 @@ Please review it at your earliest convenience.
 EOF
 
 # Look up email by alias
-./kommunicator-cli.py get-email --alias "john"
+kommunicator-cli get-email --alias "john"
 
 # Look up email by multi-word alias
-./kommunicator-cli.py get-email --alias "john smith"
+kommunicator-cli get-email --alias "john smith"
 
 # Look up email by auto-generated alias
-./kommunicator-cli.py get-email --alias "moore"
+kommunicator-cli get-email --alias "moore"
 
 # Combine get-email with send-email command (optional, can use alias directly)
-email=$(./kommunicator-cli.py get-email --alias "john")
-./kommunicator-cli.py send-email --to "$email" --subject "Hello" --body "Message"
+email=1000 27 100 1000 1001kommunicator-cli get-email --alias "john")
+kommunicator-cli send-email --to "$email" --subject "Hello" --body "Message"
 
 # Verbose mode
-./kommunicator-cli.py -v send-email --to john --subject "Test" --body "Test"
-./kommunicator-cli.py -v send-teams --to john --message "Test message"
-./kommunicator-cli.py -v get-email --alias "john"
+kommunicator-cli -v send-email --to john --subject "Test" --body "Test"
+kommunicator-cli -v send-teams --to john --message "Test message"
+kommunicator-cli -v get-email --alias "john"
 
 # Using with uv
-uv run kommunicator-cli.py send-email --to john --subject "Hello" --body "Test"
-uv run kommunicator-cli.py send-teams --to john --message "Hello from uv"
-uv run kommunicator-cli.py get-email --alias "john"
+kommunicator-cli send-email --to john --subject "Hello" --body "Test"
+kommunicator-cli send-teams --to john --message "Hello from uv"
+kommunicator-cli get-email --alias "john"
 
 # Show help for commands
-./kommunicator-cli.py send-email --help
-./kommunicator-cli.py send-teams --help
-./kommunicator-cli.py get-email --help
+kommunicator-cli send-email --help
+kommunicator-cli send-teams --help
+kommunicator-cli get-email --help
 ```
 
 #### Mass Sending
@@ -463,16 +511,16 @@ Canal_General
 
 ```bash
 # Send email to multiple recipients from a file
-./kommunicator-cli.py send-email --to conf/mass-target.conf --subject "Notice" --body "Important update"
+kommunicator-cli send-email --to conf/mass-target.conf --subject "Notice" --body "Important update"
 
 # Mass sending with body from stdin
-cat message.txt | ./kommunicator-cli.py send-email --to recipients.conf --subject "Report"
+cat message.txt | kommunicator-cli send-email --to recipients.conf --subject "Report"
 
 # Mass sending with verbose output
-./kommunicator-cli.py -v send-email --to recipients.conf --subject "Alert" --body "Urgent message"
+kommunicator-cli -v send-email --to recipients.conf --subject "Alert" --body "Urgent message"
 
 # Using with uv
-uv run kommunicator-cli.py send-email --to conf/mass-target.conf --subject "Announcement" --body "News"
+kommunicator-cli send-email --to conf/mass-target.conf --subject "Announcement" --body "News"
 ```
 
 **Behavior:**
@@ -505,19 +553,19 @@ uv run kommunicator-cli.py send-email --to conf/mass-target.conf --subject "Anno
 
 ```bash
 # Send a message to multiple recipients from a file
-./kommunicator-cli.py send-teams --to conf/mass-target.conf --message "Hello everyone"
+kommunicator-cli send-teams --to conf/mass-target.conf --message "Hello everyone"
 
 # Send an Adaptive Card to multiple recipients
-cat messages/adaptivecard.json.sample | ./kommunicator-cli.py send-teams --to recipients.conf
+cat messages/adaptivecard.json.sample | kommunicator-cli send-teams --to recipients.conf
 
 # Send a bot message to multiple recipients
-./kommunicator-cli.py send-teams --to recipients.conf --message "System notification" --bot
+kommunicator-cli send-teams --to recipients.conf --message "System notification" --bot
 
 # Mass sending with verbose output
-./kommunicator-cli.py -v send-teams --to recipients.conf --message "Alert"
+kommunicator-cli -v send-teams --to recipients.conf --message "Alert"
 
 # Using with uv
-uv run kommunicator-cli.py send-teams --to conf/mass-target.conf --message "Announcement"
+kommunicator-cli send-teams --to conf/mass-target.conf --message "Announcement"
 ```
 
 **Behavior:**
@@ -558,7 +606,7 @@ Mass sending complete: 4 succeeded, 1 failed
 ### Running the MCP Server
 
 ```bash
-uv run kommunicator-mcp.py
+uv run kommunicator_mcp.py
 ```
 
 The server will start and listen on standard input/output (stdio).
@@ -568,7 +616,7 @@ The server will start and listen on standard input/output (stdio).
 For development and testing, you can use the MCP Inspector to interact with the server:
 
 ```bash
-uv run mcp dev kommunicator-mcp.py
+uv run mcp dev kommunicator_mcp.py
 ```
 
 This will launch the MCP Inspector in your browser, providing a web interface to:
@@ -591,7 +639,7 @@ To use this MCP server with Claude Desktop, add the following configuration to y
         "--directory",
         "/path/to/kommunicator",
         "run",
-        "kommunicator-mcp.py"
+        "kommunicator_mcp.py"
       ],
       "env": {
         "TEAMS_WEBHOOK_KOMMUNICATOR": "https://your-teams-webhook-url"
@@ -768,8 +816,8 @@ send_teams(
 
 ```text
 kommunicator/
-├── kommunicator-mcp.py    # Main MCP server
-├── kommunicator-cli.py    # Command-line interface
+├── kommunicator_mcp.py    # Main MCP server
+├── kommunicator_cli.py    # Command-line interface
 ├── utils.py               # Email sending and alias utilities
 ├── logging_config.py      # Logging configuration
 ├── conf/
